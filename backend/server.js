@@ -182,6 +182,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    succeeded: true,
+    message: 'Priya Textiles API is running successfully'
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
