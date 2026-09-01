@@ -15,7 +15,7 @@ import {
 import logo from "../../assets/logo.png";
 import { useAuth } from "../../context/AuthContext";
 import { useSettings } from "../../context/SettingsContext";
-import "../style/AdminSidebar.css";
+import "../Style/AdminSidebar.css";
 
 const NAV_ITEMS = [
   { to: "/admin/dashboard", label: "Dashboard", icon: <FaChartPie /> },
