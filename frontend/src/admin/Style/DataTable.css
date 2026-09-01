@@ -1,0 +1,99 @@
+.data-table-wrap {
+  overflow-x: auto;
+  background: var(--c-white);
+  border-radius: var(--r-md, 14px);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-body);
+  min-width: 640px;
+}
+
+.data-table thead {
+  background: var(--c-cream);
+}
+
+.data-table th {
+  text-align: left;
+  padding: 14px 18px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--c-gray);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--c-ink);
+  border-top: 1px solid var(--c-border);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+  background: var(--c-cream);
+}
+
+.table-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--c-gray);
+  font-family: var(--f-body);
+  background: var(--c-white);
+  border-radius: var(--r-md, 14px);
+  border: 1px solid var(--c-border);
+}
+
+/* Reusable badge + action button styles for table cells */
+.badge {
+  display: inline-block;
+  border-radius: var(--r-pill, 999px);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.badge-green { background: #eafaf0; color: #1a7a3f; }
+.badge-blue { background: #dbeafe; color: #1e40af; }
+.badge-purple { background: #e0e7ff; color: #4338ca; }
+.badge-gold { background: var(--c-gold-pale); color: var(--c-gold-deep); }
+.badge-maroon { background: var(--c-maroon-pale); color: var(--c-maroon); }
+.badge-gray { background: var(--c-cream-deep); color: var(--c-gray); }
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.row-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--c-cream);
+  color: var(--c-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12.5px;
+  border: none;
+  transition: 0.2s;
+}
+
+.row-action-btn:hover {
+  background: var(--c-gold-pale);
+  color: var(--c-gold-deep);
+}
+
+.row-action-btn.danger:hover {
+  background: var(--c-maroon-pale);
+  color: var(--c-maroon);
+}

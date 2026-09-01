@@ -1,0 +1,67 @@
+.wcs-slider {
+  padding: 56px 0 8px;
+}
+
+.wcs-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.wcs-header h2 {
+  font-size: 32px;
+}
+
+.wcs-track-wrap {
+  position: relative;
+}
+
+.wcs-track {
+  display: flex;
+  gap: 26px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 6px 4px 14px;
+  scrollbar-width: none;
+}
+
+.wcs-track::-webkit-scrollbar {
+  display: none;
+}
+
+.wcs-arrow {
+  position: absolute;
+  top: 42%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--c-white);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-sm);
+  color: var(--c-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  z-index: 2;
+  transition: transform var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease), color var(--t-med) var(--ease);
+}
+
+.wcs-arrow:hover {
+  color: var(--c-gold-deep);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.wcs-arrow-left {
+  left: -8px;
+}
+
+.wcs-arrow-right {
+  right: -8px;
+}
+
+@media (max-width: 768px) {
+  .wcs-arrow { display: none; }
+  .wcs-track { gap: 18px; }
+}

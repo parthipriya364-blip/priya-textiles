@@ -1,0 +1,132 @@
+.banner-error {
+  background: var(--c-maroon-pale);
+  color: var(--c-maroon);
+  font-family: var(--f-body);
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm, 8px);
+  margin-bottom: 16px;
+}
+
+.banner-manager-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.banner-manager-row {
+  background: var(--c-white);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md, 14px);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  transition: 0.25s;
+}
+
+.banner-manager-row.disabled {
+  opacity: 0.55;
+}
+
+.banner-thumb {
+  position: relative;
+  width: 110px;
+  height: 62px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--c-cream);
+}
+
+.banner-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.disabled-tag {
+  position: absolute;
+  inset: 0;
+  background: rgba(21, 16, 13, 0.55);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-row-info {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.banner-row-info strong {
+  font-family: var(--f-display);
+  font-size: 15.5px;
+  color: var(--c-ink);
+}
+
+.banner-row-info span {
+  font-family: var(--f-body);
+  font-size: 12px;
+  color: var(--c-gray);
+}
+
+.banner-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.banner-row-actions .admin-btn {
+  padding: 8px 16px;
+  font-size: 12.5px;
+}
+
+.banner-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--c-border);
+}
+
+.banner-saved-note {
+  font-family: var(--f-body);
+  font-size: 12.5px;
+  color: #1a7a3f;
+}
+
+.banner-preview-modal img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+.banner-preview-modal p {
+  font-family: var(--f-body);
+  color: var(--c-gray);
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .banner-manager-row {
+    flex-wrap: wrap;
+  }
+
+  .banner-row-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,168 @@
+/* ============================================================
+   RAZORPAY-STYLE UPI CHECKOUT — FRONTEND DEMO MODAL
+   Self-contained; does not alter any existing checkout styles.
+   ============================================================ */
+
+.rzp-demo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 16, 13, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 16px;
+  animation: rzp-fade-in 0.2s ease-out;
+}
+
+@keyframes rzp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.rzp-demo-modal {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--c-white, #fff);
+  border-radius: var(--r-md, 14px);
+  box-shadow: var(--shadow-lg, 0 24px 60px rgba(21, 16, 13, 0.16));
+  padding: 26px 24px 22px;
+  animation: rzp-pop-in 0.25s var(--ease, ease-out);
+}
+
+@keyframes rzp-pop-in {
+  from { transform: translateY(12px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.rzp-demo-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-gray, #8a8074);
+  background: var(--c-cream, #fbf8f2);
+  font-size: 13px;
+  transition: background var(--t-fast, 0.2s) ease, color var(--t-fast, 0.2s) ease;
+}
+.rzp-demo-close:hover { background: var(--c-maroon-pale, #f6e7ea); color: var(--c-maroon, #6d001a); }
+.rzp-demo-close:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.rzp-demo-header { text-align: center; margin-bottom: 18px; }
+.rzp-demo-brand {
+  font-family: var(--f-display, serif);
+  font-size: 18px;
+  color: var(--c-ink, #241d18);
+  margin-bottom: 4px;
+}
+.rzp-demo-amount {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--c-maroon, #6d001a);
+  margin-bottom: 10px;
+}
+.rzp-demo-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--c-gold-deep, #a9822a);
+  background: var(--c-gold-pale, #f7efd6);
+  border: 1px solid var(--c-gold-light, #e9d48c);
+  border-radius: var(--r-pill, 999px);
+  padding: 4px 12px;
+}
+
+.rzp-demo-method {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-ink, #241d18);
+  background: var(--c-cream, #fbf8f2);
+  border: 1px solid var(--c-border, #e8e0d2);
+  border-radius: var(--r-sm, 6px);
+  padding: 10px;
+  margin-bottom: 18px;
+}
+
+.rzp-demo-form { display: flex; flex-direction: column; gap: 8px; }
+.rzp-demo-form label { font-size: 12.5px; color: var(--c-gray, #8a8074); }
+.rzp-demo-form input {
+  padding: 12px 14px;
+  border-radius: var(--r-sm, 6px);
+  border: 1px solid var(--c-border, #e8e0d2);
+  font-size: 14px;
+  font-family: var(--f-body, inherit);
+  color: var(--c-ink, #241d18);
+  transition: border-color var(--t-fast, 0.2s) ease;
+}
+.rzp-demo-form input:focus { outline: none; border-color: var(--c-gold, #d4af37); }
+.rzp-demo-form input.invalid { border-color: #c0392b; }
+.rzp-demo-error { font-size: 11.5px; color: #c0392b; }
+
+.rzp-demo-pay-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--r-sm, 6px);
+  background: var(--c-maroon, #6d001a);
+  color: var(--c-white, #fff);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background var(--t-fast, 0.2s) ease, transform var(--t-fast, 0.2s) ease;
+}
+.rzp-demo-pay-btn:hover { background: var(--c-maroon-light, #8c1230); transform: translateY(-1px); }
+
+.rzp-demo-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--c-gray, #8a8074);
+}
+.rzp-demo-disclaimer svg { flex-shrink: 0; margin-top: 2px; }
+
+.rzp-demo-processing,
+.rzp-demo-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 8px 6px;
+  gap: 10px;
+}
+
+.rzp-demo-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--c-border, #e8e0d2);
+  border-top-color: var(--c-maroon, #6d001a);
+  animation: rzp-spin 0.8s linear infinite;
+}
+@keyframes rzp-spin { to { transform: rotate(360deg); } }
+
+.rzp-demo-success-icon { font-size: 40px; color: #2e8b57; }
+.rzp-demo-success h4 { font-size: 16px; color: var(--c-ink, #241d18); margin: 0; }
+.rzp-demo-success p { font-size: 12.5px; color: var(--c-gray, #8a8074); margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rzp-demo-overlay, .rzp-demo-modal, .rzp-demo-spinner { animation: none; }
+}
+
+@media (max-width: 420px) {
+  .rzp-demo-modal { padding: 22px 18px 18px; }
+  .rzp-demo-amount { font-size: 22px; }
+}

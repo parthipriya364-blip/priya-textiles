@@ -1,0 +1,21 @@
+.admin-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.admin-page-header h1 {
+  font-family: var(--f-display);
+  font-size: 26px;
+  color: var(--c-ink);
+}
+
+.admin-page-header p {
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  color: var(--c-gray);
+  margin-top: 4px;
+}

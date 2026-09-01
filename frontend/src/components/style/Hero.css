@@ -1,0 +1,73 @@
+.hero {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.hero .swiper,
+.hero .swiper-wrapper,
+.hero .swiper-slide {
+  width: 100%;
+  height: 100%;
+}
+
+.hero .swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Navigation Buttons */
+
+.hero .swiper-button-next,
+.hero .swiper-button-prev {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  transition: .3s;
+}
+
+.hero .swiper-button-next:hover,
+.hero .swiper-button-prev:hover {
+  background: rgba(212,175,55,.95);
+}
+
+.hero .swiper-button-next::after,
+.hero .swiper-button-prev::after {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Pagination */
+
+.hero .swiper-pagination-bullet {
+  width: 12px;
+  height: 12px;
+  background: rgba(255,255,255,.6);
+  opacity: 1;
+}
+
+.hero .swiper-pagination-bullet-active {
+  background: #d4af37;
+  transform: scale(1.2);
+}
+
+@media (max-width:768px){
+
+.hero{
+height:55vh;
+}
+
+.hero .swiper-button-next,
+.hero .swiper-button-prev{
+width:42px;
+height:42px;
+}
+
+}
