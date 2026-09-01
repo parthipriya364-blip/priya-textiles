@@ -1,4 +1,4 @@
-import "../style/AdminPageHeader.css";
+import "../Style/AdminPageHeader.css";
 
 export default function AdminPageHeader({ title, subtitle, action }) {
   return (
