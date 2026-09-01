@@ -1,4 +1,4 @@
-import "../style/DataTable.css";
+import "../Style/DataTable.css";
 
 /**
  * Generic admin data table.

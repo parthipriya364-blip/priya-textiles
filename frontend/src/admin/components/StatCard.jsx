@@ -1,4 +1,4 @@
-import "../style/StatCard.css";
+import "../Style/StatCard.css";
 
 export default function StatCard({ icon, label, value, trend, tone = "gold" }) {
   return (

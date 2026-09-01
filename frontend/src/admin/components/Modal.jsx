@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
-import "../style/Modal.css";
+import "../Style/Modal.css";
 
 export default function Modal({ open, onClose, title, children, footer, size = "md" }) {
   useEffect(() => {

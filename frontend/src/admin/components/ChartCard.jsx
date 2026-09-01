@@ -1,4 +1,4 @@
-import "../style/ChartCard.css";
+import "../Style/ChartCard.css";
 
 /**
  * Lightweight dependency-free chart card.
