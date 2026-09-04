@@ -110,6 +110,9 @@
 
 .banner-preview-modal img {
   width: 100%;
+  aspect-ratio: 16 / 5;
+  object-fit: cover;
+  object-position: center;
   border-radius: 12px;
   margin-bottom: 14px;
 }

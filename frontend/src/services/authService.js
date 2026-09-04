@@ -41,22 +41,22 @@ axios.interceptors.response.use(
 export const setAuthToken = (token) => {
   if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    localStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(TOKEN_KEY, token);
   } else {
     delete axios.defaults.headers.common['Authorization'];
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
   }
 };
 
 // Get stored token
 export const getToken = () => {
-  return localStorage.getItem(TOKEN_KEY);
+  return sessionStorage.getItem(TOKEN_KEY);
 };
 
 // Get stored user
 export const getStoredUser = () => {
   try {
-    const user = localStorage.getItem(STORAGE_KEY);
+    const user = sessionStorage.getItem(STORAGE_KEY);
     return user ? JSON.parse(user) : null;
   } catch (error) {
     return null;
@@ -65,6 +65,8 @@ export const getStoredUser = () => {
 
 // Clear auth data
 export const clearAuth = () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(STORAGE_KEY);
   delete axios.defaults.headers.common['Authorization'];
@@ -77,7 +79,7 @@ export const signup = async (userData) => {
     
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -93,7 +95,7 @@ export const login = async (credentials) => {
     
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -108,7 +110,7 @@ export const getCurrentUser = async () => {
     const response = await axios.get(`${API_URL}/me`);
     
     if (response.data.success) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -134,7 +136,7 @@ export const updatePassword = async (passwords) => {
     
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -149,7 +151,7 @@ export const updateProfile = async (profileData) => {
     const response = await axios.put(`${API_URL}/updateprofile`, profileData);
     
     if (response.data.success) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;

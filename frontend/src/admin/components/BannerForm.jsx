@@ -132,7 +132,11 @@ export default function BannerForm({ initialData, onSubmit, submitLabel = "Save"
         </label>
         {mainImagePreview && (
           <div className="image-preview-strip">
-            <img src={mainImagePreview} alt="Banner preview" style={{ maxHeight: '200px' }} />
+            <img
+              src={mainImagePreview}
+              alt="Banner preview"
+              style={{ width: '100%', aspectRatio: '16 / 5', objectFit: 'cover', objectPosition: 'center', maxHeight: '260px' }}
+            />
           </div>
         )}
         <small style={{ color: '#666' }}>

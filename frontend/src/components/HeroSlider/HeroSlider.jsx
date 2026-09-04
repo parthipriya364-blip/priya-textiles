@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useBanners } from "../../context/BannerContext";
 import "./HeroSlider.css";
@@ -64,15 +64,26 @@ export default function HeroSlider({ className = "" }) {
       onMouseLeave={() => setPaused(false)}
     >
       {slides.map((slide, i) => (
-        <img
-          key={slide._id || slide.id}
+        <Fragment key={slide._id || slide.id}>
+          <img
           src={slide.image?.url || slide.image}
           alt={slide.title || "Priya Textiles banner"}
           className={`hero-slide ${i === index ? "active" : ""}`}
           loading={i === 0 ? "eager" : "lazy"}
           fetchpriority={i === 0 ? "high" : "auto"}
           decoding="async"
-        />
+          />
+          {(slide.title || slide.subtitle) && (
+            <a
+              className={`hero-slide-content ${i === index ? "active" : ""}`}
+              href={slide.link || undefined}
+              onClick={(event) => { if (!slide.link) event.preventDefault(); }}
+            >
+              {slide.title && <h2>{slide.title}</h2>}
+              {slide.subtitle && <p>{slide.subtitle}</p>}
+            </a>
+          )}
+        </Fragment>
       ))}
 
       {count > 1 && (

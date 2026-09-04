@@ -44,8 +44,8 @@ export default function AdminNavbar({ onMenuClick }) {
     } catch (error) {
       console.error('Logout error:', error);
       // Even if logout API fails, clear local storage and redirect
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       window.location.href = '/login';
     }
   };

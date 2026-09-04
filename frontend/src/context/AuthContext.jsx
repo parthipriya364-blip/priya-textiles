@@ -8,7 +8,7 @@ const API_URL = API_BASE_URL;
 
 function loadInitial() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -19,8 +19,8 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(loadInitial);
 
   useEffect(() => {
-    if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    else localStorage.removeItem(STORAGE_KEY);
+    if (user) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    else sessionStorage.removeItem(STORAGE_KEY);
   }, [user]);
 
   const authenticate = async (path, payload) => {
@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "Authentication failed.");
-    localStorage.setItem(TOKEN_KEY, data.token);
+    sessionStorage.setItem(TOKEN_KEY, data.token);
     setUser(data.user);
     return data.user;
   };
@@ -52,10 +52,10 @@ export function AuthProvider({ children }) {
     } finally {
       // Clear local state regardless of API success
       setUser(null);
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       // Force full page reload to clear all state
       window.location.href = '/login';
     }
