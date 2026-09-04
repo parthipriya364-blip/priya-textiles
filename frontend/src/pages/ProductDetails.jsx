@@ -109,8 +109,9 @@ export default function ProductDetails() {
       showToast('Product is out of stock', 'error');
       return;
     }
-    addToCart(product, size, qty);
-    showToast(`${qty} × ${product.name} added to cart`);
+    addToCart(product, size, qty).then((added) => {
+      if (added) showToast(`${qty} × ${product.name} added to cart`);
+    });
   };
 
   const handleBuyNow = () => {
@@ -122,8 +123,9 @@ export default function ProductDetails() {
       showToast('Product is out of stock', 'error');
       return;
     }
-    addToCart(product, size, qty);
-    navigate("/cart");
+    addToCart(product, size, qty).then((added) => {
+      if (added) navigate("/cart");
+    });
   };
 
   return (
@@ -263,8 +265,10 @@ export default function ProductDetails() {
               <button
                 className={`pd-wish ${wishlisted ? "is-active" : ""}`}
                 onClick={() => {
-                  toggleWishlist(product);
-                  showToast(wishlisted ? "Removed from wishlist" : "Added to wishlist", wishlisted ? "error" : "success");
+                  const changed = toggleWishlist(product);
+                  if (changed) {
+                    showToast(wishlisted ? "Removed from wishlist" : "Added to wishlist", wishlisted ? "error" : "success");
+                  }
                 }}
                 aria-label="Toggle wishlist"
               >

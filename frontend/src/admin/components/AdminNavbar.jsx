@@ -56,8 +56,8 @@ export default function AdminNavbar({ onMenuClick }) {
         <FaBars />
       </button>
 
-      {/* Store logo — links back to storefront */}
-      <Link to="/" className="admin-navbar-logo" aria-label="View store">
+      {/* Admin logo stays inside the dashboard */}
+      <Link to="/admin/dashboard" className="admin-navbar-logo" aria-label="Admin dashboard">
         <img
           src={settings.logo || logoFallback}
           alt={settings.storeName}

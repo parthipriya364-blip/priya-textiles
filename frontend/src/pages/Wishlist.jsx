@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { FaHeartBroken, FaShoppingBag, FaTrashAlt } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
 import StarRating from "../components/StarRating";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 import { formatPrice } from "../utils/formatPrice";
 import "./style/Wishlist.css";
 
@@ -12,6 +14,17 @@ export default function Wishlist() {
   const { wishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`, { replace: true });
+    }
+  }, [user, navigate, location.pathname]);
+
+  if (!user) return null;
 
   return (
     <div className="page-enter">

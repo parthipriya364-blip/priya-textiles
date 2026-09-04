@@ -95,12 +95,12 @@ export default function Header() {
               <FaSearch />
             </button>
 
-            <Link to="/wishlist" aria-label="Wishlist" className="icon-link">
+            <Link to={isLoggedIn ? "/wishlist" : "/login?redirect=%2Fwishlist"} aria-label="Wishlist" className="icon-link">
               <FaHeart />
               {wishlist.length > 0 && <span className="icon-count">{wishlist.length}</span>}
             </Link>
 
-            <Link to="/cart" aria-label="Cart" className="icon-link">
+            <Link to={isLoggedIn ? "/cart" : "/login?redirect=%2Fcart"} aria-label="Cart" className="icon-link">
               <FaShoppingBag />
               {totalItems > 0 && <span className="icon-count">{totalItems}</span>}
             </Link>

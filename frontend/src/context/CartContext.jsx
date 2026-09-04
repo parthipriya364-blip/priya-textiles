@@ -5,6 +5,7 @@ import { useToast } from "./ToastContext";
 
 const CartContext = createContext(null);
 const STORAGE_KEY = "priya-textiles-cart";
+const USER_STORAGE_KEY = "priya-textiles-user";
 
 // Load cart from localStorage (for guests)
 function loadLocalCart() {
@@ -48,6 +49,13 @@ export function CartProvider({ children }) {
           paymentMethods: item.product.paymentMethods || { card: true, upi: true, cod: true },
         }));
         setItems(formattedItems);
+        const user = JSON.parse(localStorage.getItem(USER_STORAGE_KEY) || "null");
+        if (user) {
+          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify({
+            ...user,
+            cartProductIds: formattedItems.map((item) => item.id),
+          }));
+        }
       } else {
         // Load from localStorage
         setItems(loadLocalCart());
@@ -84,41 +92,17 @@ export function CartProvider({ children }) {
   }, []);
 
   const addToCart = async (product, size = product.sizes?.[0] || "Free Size", qty = 1) => {
+    if (!isAuth) {
+      const redirect = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      window.location.assign(`/login?redirect=${encodeURIComponent(redirect)}`);
+      return false;
+    }
+
     try {
-      if (isAuth) {
-        // Add to database
-        const productId = product._id || product.id;
-        await cartService.addToCart(productId, qty, size);
-        await loadCart();
-      } else {
-        // Add to localStorage
-        const productId = product._id || product.id;
-        const lineId = `${productId}-${size}`;
-        const existing = items.find((item) => item.lineId === lineId);
-        
-        if (existing) {
-          setItems(items.map((item) =>
-            item.lineId === lineId ? { ...item, qty: item.qty + qty } : item
-          ));
-        } else {
-          setItems([
-            ...items,
-            {
-              lineId,
-              id: productId,
-              name: product.name,
-              image: product.image?.url || product.image,
-              price: product.price,
-              oldPrice: product.oldPrice,
-              size,
-              qty,
-              stock: product.stock,
-              inStock: product.inStock,
-              paymentMethods: product.paymentMethods || { card: true, upi: true, cod: true },
-            },
-          ]);
-        }
-      }
+      const productId = product._id || product.id;
+      await cartService.addToCart(productId, qty, size);
+      await loadCart();
+      return true;
     } catch (error) {
       showToast?.(error.message || 'Failed to add to cart', 'error');
       throw error;

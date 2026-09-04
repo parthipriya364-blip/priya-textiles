@@ -1,16 +1,28 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { FaTrashAlt, FaShoppingBag, FaArrowRight } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
 import QuantitySelector from "../components/QuantitySelector";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 import { formatPrice } from "../utils/formatPrice";
 import "./style/Cart.css";
 
 export default function Cart() {
   const { items, removeFromCart, updateQty, subtotal, savings } = useCart();
   const { showToast } = useToast();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`, { replace: true });
+    }
+  }, [user, navigate, location.pathname]);
+
+  if (!user) return null;
 
   const shipping = subtotal >= 2999 || subtotal === 0 ? 0 : 149;
   const total = subtotal + shipping;

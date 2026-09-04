@@ -8,7 +8,7 @@ export default function ProtectedRoute() {
 
   if (!isAuth) {
     // Redirect to login if not authenticated
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    return <Navigate to="/admin/login" replace state={{ from: location }} />;
   }
 
   if (!userIsAdmin) {

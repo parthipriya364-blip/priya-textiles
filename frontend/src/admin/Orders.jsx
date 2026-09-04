@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaPrint, FaEdit, FaSpinner } from "react-icons/fa";
 import AdminPageHeader from "./components/AdminPageHeader";
 import SearchBar from "./components/SearchBar";
@@ -31,6 +32,7 @@ const paymentBadge = (status) => {
 };
 
 export default function Orders() {
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -144,7 +146,11 @@ export default function Orders() {
           { 
             key: "id", 
             label: "Order ID",
-            render: (b) => `#${b._id.slice(-8).toUpperCase()}`
+            render: (b) => (
+              <Link className="admin-order-link" to={`/admin/orders/${b._id}`}>
+                #{b._id.slice(-8).toUpperCase()}
+              </Link>
+            )
           },
           { 
             key: "customer", 
@@ -201,7 +207,7 @@ export default function Orders() {
               <div className="row-actions">
                 <button 
                   className="row-action-btn" 
-                  onClick={() => setViewOrder(b)} 
+                  onClick={() => navigate(`/admin/orders/${b._id}`)} 
                   aria-label="View"
                   title="View Details"
                 >

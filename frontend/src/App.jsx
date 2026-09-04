@@ -42,6 +42,7 @@ import AddProduct from "./admin/AddProduct";
 import EditProduct from "./admin/EditProduct";
 import Categories from "./admin/Categories";
 import Orders from "./admin/Orders";
+import AdminOrderDetails from "./admin/OrderDetails";
 import Customers from "./admin/Customers";
 import Reviews from "./admin/Reviews";
 import Revenue from "./admin/Revenue";
@@ -87,6 +88,9 @@ export default function App() {
                   {/* Conditional floating contact bar — only shows on customer pages, not admin */}
                   <ConditionalFloatingContact />
                   <Routes>
+                    {/* ---------- Admin login stays outside the storefront shell ---------- */}
+                    <Route path="/admin/login" element={<Login adminOnly />} />
+
                     {/* ---------- Customer storefront ---------- */}
                     <Route element={<Layout />}>
                       <Route path="/" element={<Home />} />
@@ -121,6 +125,7 @@ export default function App() {
                         <Route path="products/edit/:id" element={<EditProduct />} />
                         <Route path="categories" element={<Categories />} />
                         <Route path="orders" element={<Orders />} />
+                        <Route path="orders/:id" element={<AdminOrderDetails />} />
                         <Route path="customers" element={<Customers />} />
                         <Route path="reviews" element={<Reviews />} />
                         <Route path="revenue" element={<Revenue />} />

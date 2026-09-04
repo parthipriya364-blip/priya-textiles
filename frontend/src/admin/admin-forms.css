@@ -96,6 +96,16 @@
   color: var(--c-gold-deep);
 }
 
+.admin-order-link {
+  color: var(--c-maroon);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-order-link:hover {
+  text-decoration: underline;
+}
+
 .admin-btn-maroon {
   background: var(--c-maroon);
   color: var(--c-white);

@@ -42,10 +42,10 @@ export default function MobileMenu({ open, onClose, links }) {
           <Link to={user ? "/wishlist" : "/login"} onClick={onClose}>
             <FaUser /> {user ? `Hi, ${user.name}` : "Login / Register"}
           </Link>
-          <Link to="/wishlist" onClick={onClose}>
+          <Link to={user ? "/wishlist" : "/login?redirect=%2Fwishlist"} onClick={onClose}>
             <FaHeart /> Wishlist
           </Link>
-          <Link to="/cart" onClick={onClose}>
+          <Link to={user ? "/cart" : "/login?redirect=%2Fcart"} onClick={onClose}>
             <FaShoppingBag /> Cart
           </Link>
         </div>

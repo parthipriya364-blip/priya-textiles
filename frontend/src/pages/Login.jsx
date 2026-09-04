@@ -3,14 +3,15 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaSignInAlt, FaGoogle } from "react-icons/fa";
 import { useToast } from "../context/ToastContext";
 import { useCart } from "../context/CartContext";
-import { login } from "../services/authService";
 import { getGoogleAuthUrl } from "../config";
 import { isValidEmail, isValidPassword } from "../utils/validators";
+import { useAuth } from "../context/AuthContext";
 import "./style/Auth.css";
 
-export default function Login() {
+export default function Login({ adminOnly = false }) {
   const { showToast } = useToast();
   const { syncLocalCart } = useCart();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,18 +32,25 @@ export default function Login() {
     setLoading(true);
     
     try {
-      const response = await login(form);
+      const user = await login(form);
       
       // Sync local cart with database after login
       await syncLocalCart();
       
       showToast("Welcome back!");
       
+      if (adminOnly && user.role !== 'admin') {
+        setErrors({ general: "This login is for administrators only." });
+        showToast("Administrator access required.", "error");
+        return;
+      }
+
       // Redirect based on user role
-      if (response.user.role === 'admin') {
+      if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
-        navigate(location.state?.from || "/");
+        const redirect = new URLSearchParams(location.search).get("redirect");
+        navigate(redirect || "/");
       }
     } catch (error) {
       setErrors({ general: error.message || "Login failed. Please try again." });
@@ -63,7 +71,7 @@ export default function Login() {
           <div className="auth-card-head">
             <span className="eyebrow">Welcome Back</span>
             <h1>Login to Your Account</h1>
-            <p>Access your orders, wishlist and saved addresses.</p>
+            <p>{adminOnly ? "Sign in to manage your store." : "Access your orders, wishlist and saved addresses."}</p>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>

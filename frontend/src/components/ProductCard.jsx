@@ -24,17 +24,20 @@ export default function ProductCard({ product }) {
       showToast('Product is out of stock', 'error');
       return;
     }
-    addToCart(product);
-    showToast(`${product.name} added to cart`);
+    addToCart(product).then((added) => {
+      if (added) showToast(`${product.name} added to cart`);
+    });
   };
 
   const handleWishlist = (e) => {
     e.preventDefault();
-    toggleWishlist(product);
-    showToast(
-      wishlisted ? `Removed from wishlist` : `Added to wishlist`,
-      wishlisted ? "error" : "success"
-    );
+    const changed = toggleWishlist(product);
+    if (changed) {
+      showToast(
+        wishlisted ? `Removed from wishlist` : `Added to wishlist`,
+        wishlisted ? "error" : "success"
+      );
+    }
   };
 
   const handleQuickView = (e) => {
