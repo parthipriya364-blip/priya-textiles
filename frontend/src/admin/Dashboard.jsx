@@ -7,7 +7,9 @@ import {
   FaStar,
   FaExclamationTriangle,
   FaBolt,
+  FaArrowRight,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import StatCard from "./components/StatCard";
 import ChartCard from "./components/ChartCard";
 import DataTable from "./components/DataTable";
@@ -117,6 +119,54 @@ export default function Dashboard() {
   const totalProductValue = useMemo(() => 
     products.reduce((sum, p) => sum + (p.price * (p.stock || 0)), 0),
     [products]
+  );
+
+  const monthlySchedule = useMemo(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const ordersByDay = bookings.reduce((days, booking) => {
+      const date = new Date(booking.createdAt);
+      if (date.getFullYear() === year && date.getMonth() === month) {
+        const day = date.getDate();
+        days[day] = (days[day] || 0) + 1;
+      }
+      return days;
+    }, {});
+
+    return {
+      label: today.toLocaleDateString("en-IN", { month: "long", year: "numeric" }),
+      firstDay,
+      daysInMonth,
+      today: today.getDate(),
+      ordersByDay,
+    };
+  }, [bookings]);
+
+  const revenuePipeline = useMemo(() => {
+    const stages = [
+      { key: "confirmed", label: "Confirmed", tone: "gold" },
+      { key: "shipped", label: "Shipped", tone: "blue" },
+      { key: "out-for-delivery", label: "Out for delivery", tone: "purple" },
+      { key: "delivered", label: "Delivered", tone: "green" },
+    ];
+    return stages.map((stage) => {
+      const stageBookings = bookings.filter((booking) => booking.orderStatus === stage.key);
+      return {
+        ...stage,
+        count: stageBookings.length,
+        value: stageBookings
+          .filter((booking) => booking.paymentStatus === "paid")
+          .reduce((sum, booking) => sum + (booking.total || 0), 0),
+      };
+    });
+  }, [bookings]);
+
+  const pendingQuotations = useMemo(
+    () => bookings.filter((booking) => booking.paymentStatus === "pending").slice(0, 5),
+    [bookings]
   );
 
   const recentOrders = useMemo(() =>
@@ -376,6 +426,78 @@ export default function Dashboard() {
           <p style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
             No orders placed yet
           </p>
+        )}
+      </div>
+
+      <div className="admin-grid cols-2 dashboard-business-grid">
+        <div className="dashboard-list-card monthly-schedule">
+          <div className="dashboard-section-heading">
+            <div>
+              <h3>Monthly Schedule</h3>
+              <span>{monthlySchedule.label}</span>
+            </div>
+            <span className="schedule-total">
+              {Object.values(monthlySchedule.ordersByDay).reduce((sum, count) => sum + count, 0)} orders
+            </span>
+          </div>
+          <div className="schedule-weekdays">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}
+          </div>
+          <div className="schedule-grid">
+            {Array.from({ length: monthlySchedule.firstDay }).map((_, index) => <span key={`empty-${index}`} />)}
+            {Array.from({ length: monthlySchedule.daysInMonth }, (_, index) => {
+              const day = index + 1;
+              const orderCount = monthlySchedule.ordersByDay[day] || 0;
+              return (
+                <span key={day} className={day === monthlySchedule.today ? "is-today" : ""}>
+                  {day}
+                  {orderCount > 0 && <b title={`${orderCount} order${orderCount > 1 ? "s" : ""}`}>{orderCount}</b>}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="dashboard-list-card revenue-pipeline">
+          <div className="dashboard-section-heading">
+            <div>
+              <h3>Revenue Pipeline</h3>
+              <span>Paid booking value by stage</span>
+            </div>
+            <Link to="/admin/revenue" className="dashboard-text-link">Details <FaArrowRight /></Link>
+          </div>
+          <ul>
+            {revenuePipeline.map((stage) => (
+              <li key={stage.key}>
+                <span className={`pipeline-dot ${stage.tone}`} />
+                <div className="pipeline-stage"><strong>{stage.label}</strong><span>{stage.count} order{stage.count !== 1 ? "s" : ""}</span></div>
+                <strong className="pipeline-value">₹{stage.value.toLocaleString("en-IN")}</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="dashboard-list-card pending-quotations">
+        <div className="dashboard-section-heading">
+          <div>
+            <h3>Pending Quotations</h3>
+            <span>Bookings awaiting payment</span>
+          </div>
+          <Link to="/admin/orders?paymentStatus=pending" className="dashboard-text-link">View All <FaArrowRight /></Link>
+        </div>
+        {pendingQuotations.length > 0 ? (
+          <DataTable
+            columns={[
+              { key: "id", label: "Reference", render: (booking) => `#${booking._id.slice(-8).toUpperCase()}` },
+              { key: "customer", label: "Customer", render: (booking) => booking.customer.name },
+              { key: "amount", label: "Amount", render: (booking) => `₹${(booking.total || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` },
+              { key: "date", label: "Created", render: (booking) => formatDate(booking.createdAt) },
+            ]}
+            rows={pendingQuotations}
+          />
+        ) : (
+          <p className="dashboard-empty">No pending quotations.</p>
         )}
       </div>
     </div>

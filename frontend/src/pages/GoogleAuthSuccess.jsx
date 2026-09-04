@@ -17,7 +17,7 @@ export default function GoogleAuthSuccess() {
         
         // Store token and user data
         setAuthToken(token);
-        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('priya-textiles-user', JSON.stringify(user));
         
         // Redirect based on role
         if (user.role === 'admin') {

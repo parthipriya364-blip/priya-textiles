@@ -86,3 +86,48 @@
   color: var(--c-ink);
   margin-bottom: 14px;
 }
+
+.dashboard-business-grid {
+  margin: 24px 0;
+  align-items: stretch;
+}
+
+.dashboard-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dashboard-section-heading h3 { margin-bottom: 4px; }
+.dashboard-section-heading span { font-size: 12px; color: var(--c-gray); }
+.dashboard-text-link { color: var(--c-maroon); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.dashboard-text-link svg { margin-left: 4px; font-size: 10px; }
+.schedule-total { color: var(--c-gold-deep) !important; font-weight: 700; white-space: nowrap; }
+
+.schedule-weekdays, .schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.schedule-weekdays { margin-bottom: 8px; }
+.schedule-weekdays span { color: var(--c-gray); font-size: 10px; font-weight: 700; }
+.schedule-grid > span { min-height: 36px; padding: 7px 2px; border: 1px solid transparent; border-radius: 6px; font-size: 12px; position: relative; }
+.schedule-grid > span.is-today { background: var(--c-gold-pale); border-color: var(--c-gold); font-weight: 700; }
+.schedule-grid b { display: block; margin: 2px auto 0; width: 15px; height: 15px; border-radius: 50%; background: var(--c-maroon); color: var(--c-white); font-size: 9px; line-height: 15px; }
+
+.revenue-pipeline ul { gap: 16px; }
+.revenue-pipeline li { display: flex; align-items: center; gap: 10px; }
+.pipeline-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: var(--c-gray); }
+.pipeline-dot.gold { background: var(--c-gold-deep); }
+.pipeline-dot.blue { background: #356ca5; }
+.pipeline-dot.purple { background: #76558f; }
+.pipeline-dot.green { background: #42805b; }
+.pipeline-stage { display: flex; flex-direction: column; flex: 1; }
+.pipeline-stage span { font-size: 11px; color: var(--c-gray); }
+.pipeline-value { font-size: 13px; color: var(--c-ink); }
+.pending-quotations { margin-bottom: 24px; }
+.dashboard-empty { padding: 18px 0 4px; text-align: center; color: var(--c-gray); font-size: 13px; }
