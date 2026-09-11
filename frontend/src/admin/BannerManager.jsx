@@ -95,11 +95,6 @@ export default function BannerManager() {
             <div className={`banner-manager-row ${banner.enabled ? "" : "disabled"}`} key={banner._id}>
               <div className="banner-thumb">
                 <img src={banner.image?.url || banner.image} alt={banner.title || "Banner"} />
-                {!banner.enabled && <span className="disabled-tag">Disabled</span>}
-              </div>
-
-              <div className="banner-row-info">
-                <strong>Banner {i + 1}</strong>
               </div>
 
               <div className="banner-row-actions">
@@ -169,9 +164,6 @@ export default function BannerManager() {
         {previewBanner && (
           <div className="banner-preview-modal">
             <img src={previewBanner.image?.url || previewBanner.image} alt="Banner" />
-            {previewBanner.link && <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#666' }}>
-              Link: {previewBanner.link}
-            </p>}
           </div>
         )}
       </Modal>
