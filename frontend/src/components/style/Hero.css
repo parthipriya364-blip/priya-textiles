@@ -1,10 +1,9 @@
 .hero {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 5;
-  height: auto;
-  min-height: 360px;
-  max-height: 620px;
+  height: 100svh;
+  min-height: 100svh;
+  max-height: none;
   overflow: hidden;
   background: #fff;
 }
@@ -64,8 +63,8 @@
 @media (max-width:768px){
 
 .hero{
-aspect-ratio: 4 / 3;
-min-height: 0;
+  height: 100svh;
+  min-height: 100svh;
 max-height: none;
 }
 
