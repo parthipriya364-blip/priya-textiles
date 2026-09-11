@@ -116,7 +116,7 @@
   .hero-slider-dot.active {
     width: 20px;
   }
-
+}
 
 @media (prefers-reduced-motion: reduce) {
   .hero-slide {
