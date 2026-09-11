@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const Booking = require('../models/Booking');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
-const { sendBookingConfirmation, sendOrderStatusUpdate } = require('../utils/emailService');
+const { sendBookingConfirmation, sendOrderStatusUpdate, sendAdminOrderNotification } = require('../utils/emailService');
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -141,9 +141,26 @@ exports.verifyAndCreateBooking = async (req, res) => {
 
     // Update product stock
     for (const item of items) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: -item.quantity },
-      });
+      const updatedProduct = await Product.findByIdAndUpdate(
+        item.product, 
+        { $inc: { stock: -item.quantity } },
+        { new: true }
+      );
+
+      // Check for low stock and emit notification
+      const LOW_STOCK_THRESHOLD = 10;
+      if (updatedProduct && updatedProduct.stock <= LOW_STOCK_THRESHOLD && updatedProduct.stock > 0) {
+        const io = req.app.get('io');
+        if (io) {
+          io.to('admin-room').emit('low-stock-alert', {
+            productId: updatedProduct._id,
+            productName: updatedProduct.name,
+            stock: updatedProduct.stock,
+            threshold: LOW_STOCK_THRESHOLD,
+          });
+          console.log(`⚠️  Low stock alert emitted for: ${updatedProduct.name} (${updatedProduct.stock} left)`);
+        }
+      }
     }
 
     // Clear user's cart if logged in
@@ -164,6 +181,38 @@ exports.verifyAndCreateBooking = async (req, res) => {
     sendBookingConfirmation(booking).catch(err => 
       console.error('Email notification failed:', err.message)
     );
+
+    // Send admin notification email
+    sendAdminOrderNotification(booking).catch(err =>
+      console.error('Admin notification email failed:', err.message)
+    );
+
+    // Emit Socket.IO event for real-time notification
+    const io = req.app.get('io');
+    if (io) {
+      // Emit to admin room
+      io.to('admin-room').emit('new-order', {
+        orderId: booking._id,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        amount: total,
+        paymentMethod: 'razorpay',
+        paymentStatus: 'paid',
+        itemCount: items.length,
+        timestamp: booking.createdAt,
+      });
+
+      // Emit to user's room if logged in
+      if (req.user) {
+        io.to(`user-${req.user.id}`).emit('order-confirmed', {
+          orderId: booking._id,
+          message: 'Your order has been confirmed',
+          amount: total,
+        });
+      }
+
+      console.log('📡 Socket.IO: New order notification emitted');
+    }
 
     res.status(201).json({
       success: true,
@@ -186,6 +235,10 @@ exports.verifyAndCreateBooking = async (req, res) => {
 exports.createCODBooking = async (req, res) => {
   try {
     const { items, customer, subtotal, shipping, total, paymentMethod } = req.body;
+
+    console.log('💰 Creating COD booking...');
+    console.log('   User ID:', req.user ? req.user.id : 'Guest');
+    console.log('   Customer:', customer.name, customer.email);
 
     // Validate required fields
     if (!items || items.length === 0) {
@@ -228,7 +281,7 @@ exports.createCODBooking = async (req, res) => {
       }
     }
 
-    // Create booking
+    // Create booking (with user ID if authenticated)
     const booking = await Booking.create({
       user: req.user ? req.user.id : null,
       items,
@@ -241,11 +294,31 @@ exports.createCODBooking = async (req, res) => {
       orderStatus: 'confirmed',
     });
 
+    console.log('✅ COD booking created:', booking._id);
+    console.log('   Associated with user:', booking.user || 'No user (Guest)');
+
     // Update product stock
     for (const item of items) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: -item.quantity },
-      });
+      const updatedProduct = await Product.findByIdAndUpdate(
+        item.product, 
+        { $inc: { stock: -item.quantity } },
+        { new: true }
+      );
+
+      // Check for low stock and emit notification
+      const LOW_STOCK_THRESHOLD = 10;
+      if (updatedProduct && updatedProduct.stock <= LOW_STOCK_THRESHOLD && updatedProduct.stock > 0) {
+        const io = req.app.get('io');
+        if (io) {
+          io.to('admin-room').emit('low-stock-alert', {
+            productId: updatedProduct._id,
+            productName: updatedProduct.name,
+            stock: updatedProduct.stock,
+            threshold: LOW_STOCK_THRESHOLD,
+          });
+          console.log(`⚠️  Low stock alert emitted for: ${updatedProduct.name} (${updatedProduct.stock} left)`);
+        }
+      }
     }
 
     // Clear user's cart if logged in
@@ -267,13 +340,52 @@ exports.createCODBooking = async (req, res) => {
       console.error('Email notification failed:', err.message)
     );
 
+    // Send admin notification email
+    sendAdminOrderNotification(booking).catch(err =>
+      console.error('Admin notification email failed:', err.message)
+    );
+
+    // Emit Socket.IO event for real-time notification
+    const io = req.app.get('io');
+    if (io) {
+      // Emit to admin room
+      io.to('admin-room').emit('new-order', {
+        orderId: booking._id,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        amount: total,
+        paymentMethod: 'cod',
+        paymentStatus: 'pending',
+        itemCount: items.length,
+        timestamp: booking.createdAt,
+      });
+
+      // Emit payment received notification to admin
+      io.to('admin-room').emit('payment-received', {
+        orderId: booking._id,
+        amount: total,
+        paymentMethod: 'cod',
+      });
+
+      // Emit to user's room if logged in
+      if (req.user) {
+        io.to(`user-${req.user.id}`).emit('order-confirmed', {
+          orderId: booking._id,
+          message: 'Your COD order has been confirmed',
+          amount: total,
+        });
+      }
+
+      console.log('📡 Socket.IO: COD order notification emitted');
+    }
+
     res.status(201).json({
       success: true,
       message: 'COD booking confirmed',
       booking,
     });
   } catch (error) {
-    console.error('Create COD booking error:', error);
+    console.error('❌ Create COD booking error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to create COD booking',
@@ -287,17 +399,21 @@ exports.createCODBooking = async (req, res) => {
 // @access  Private
 exports.getMyBookings = async (req, res) => {
   try {
+    console.log('📦 Fetching bookings for user:', req.user.id);
+    
     const bookings = await Booking.find({ user: req.user.id })
       .populate('items.product', 'name slug image')
       .sort({ createdAt: -1 });
 
+    console.log('✅ Found', bookings.length, 'bookings for user:', req.user.id);
+    
     res.status(200).json({
       success: true,
       count: bookings.length,
       bookings,
     });
   } catch (error) {
-    console.error('Get my bookings error:', error);
+    console.error('❌ Get my bookings error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch bookings',

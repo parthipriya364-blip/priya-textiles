@@ -10,7 +10,7 @@ const {
   cancelBooking,
   getRazorpayKey,
 } = require('../controller/paymentController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, optionalProtect } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.get('/booking/:id', getBooking);
 // Protected routes
 router.post('/create-order', protect, createRazorpayOrder);
 router.post('/verify-and-book', protect, verifyAndCreateBooking);
-router.post('/cod-booking', createCODBooking); // Can be accessed without login
+router.post('/cod-booking', optionalProtect, createCODBooking); // Allow both logged-in and guest users
 router.get('/my-bookings', protect, getMyBookings);
 router.put('/booking/:id/cancel', protect, cancelBooking);
 

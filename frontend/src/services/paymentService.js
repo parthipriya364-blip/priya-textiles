@@ -65,14 +65,19 @@ export const verifyAndCreateBooking = async (paymentData) => {
 // Create COD Booking
 export const createCODBooking = async (bookingData) => {
   try {
+    console.log('💰 Creating COD booking...');
     const config = getAxiosConfig();
+    console.log('🔑 Auth config:', config.headers ? 'Token present' : 'No token');
+    
     const response = await axios.post(
       `${API_URL}/cod-booking`,
       bookingData,
       config
     );
+    console.log('✅ COD booking created successfully');
     return response.data;
   } catch (error) {
+    console.error('❌ Failed to create COD booking:', error.response?.data || error.message);
     throw error.response?.data || { message: 'Failed to create COD booking' };
   }
 };
@@ -80,10 +85,15 @@ export const createCODBooking = async (bookingData) => {
 // Get User Bookings
 export const getMyBookings = async () => {
   try {
+    console.log('📦 Fetching user bookings...');
     const config = getAxiosConfig();
+    console.log('🔑 Auth config:', config.headers ? 'Token present' : 'No token');
+    
     const response = await axios.get(`${API_URL}/my-bookings`, config);
+    console.log('✅ Bookings fetched:', response.data.count, 'orders');
     return response.data;
   } catch (error) {
+    console.error('❌ Failed to fetch bookings:', error.response?.data || error.message);
     throw error.response?.data || { message: 'Failed to fetch bookings' };
   }
 };

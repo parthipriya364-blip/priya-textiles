@@ -80,6 +80,9 @@ export const signup = async (userData) => {
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('userChanged'));
     }
     
     return response.data;
@@ -96,6 +99,9 @@ export const login = async (credentials) => {
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('userChanged'));
     }
     
     return response.data;
@@ -111,6 +117,7 @@ export const getCurrentUser = async () => {
     
     if (response.data.success) {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -137,6 +144,7 @@ export const updatePassword = async (passwords) => {
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -152,6 +160,9 @@ export const updateProfile = async (profileData) => {
     
     if (response.data.success) {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('userChanged'));
     }
     
     return response.data;
@@ -168,6 +179,10 @@ export const logout = async () => {
     console.error('Logout error:', error);
   } finally {
     clearAuth();
+    // Also clear the old 'user' key if it exists
+    localStorage.removeItem('user');
+    // Dispatch custom event to notify components
+    window.dispatchEvent(new Event('userChanged'));
   }
 };
 

@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { setAuthToken } from '../services/authService';
 
+const STORAGE_KEY = 'priya-textiles-user';
+
 export default function GoogleAuthSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -17,7 +19,11 @@ export default function GoogleAuthSuccess() {
         
         // Store token and user data
         setAuthToken(token);
-        sessionStorage.setItem('priya-textiles-user', JSON.stringify(user));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+        
+        // Dispatch custom event to notify components
+        window.dispatchEvent(new Event('userChanged'));
         
         // Redirect based on role
         if (user.role === 'admin') {

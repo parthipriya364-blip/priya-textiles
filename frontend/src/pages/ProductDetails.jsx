@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { FaHeart, FaRegHeart, FaShoppingBag, FaBolt, FaTruck, FaUndoAlt, FaShieldAlt } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaShoppingBag, FaBolt, FaTruck, FaUndoAlt, FaShieldAlt, FaStar, FaStarHalfAlt, FaRegStar, FaCheckCircle } from "react-icons/fa";
 import { getProduct, getProducts } from "../services/productService";
+import { getProductReviews } from "../services/reviewService";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useToast } from "../context/ToastContext";
@@ -25,6 +26,9 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [avgRating, setAvgRating] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
   const [size, setSize] = useState(null);
   const [qty, setQty] = useState(1);
@@ -34,6 +38,12 @@ export default function ProductDetails() {
   useEffect(() => {
     loadProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (product && tab === "Reviews") {
+      loadReviews();
+    }
+  }, [product, tab]);
 
   const loadProduct = async () => {
     if (!objectIdPattern.test(id)) {
@@ -73,6 +83,50 @@ export default function ProductDetails() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadReviews = async () => {
+    try {
+      setReviewsLoading(true);
+      const data = await getProductReviews(id);
+      setReviews(data.reviews || []);
+      setAvgRating(parseFloat(data.avgRating) || 0);
+    } catch (error) {
+      console.error('Failed to load reviews:', error);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<FaStar key={i} className="star filled" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<FaStarHalfAlt key={i} className="star half" />);
+      } else {
+        stars.push(<FaRegStar key={i} className="star empty" />);
+      }
+    }
+    return stars;
+  };
+
+  const formatReviewDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 30) return `${diffDays} days ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   if (loading) return <Loader label="Loading product" />;
@@ -318,8 +372,70 @@ export default function ProductDetails() {
             )}
             {tab === "Reviews" && (
               <div className="pd-reviews">
-                <StarRating rating={product.rating || 0} reviews={product.reviewsCount || 0} size={16} />
-                <p>Detailed customer reviews for this piece will appear here soon.</p>
+                {reviewsLoading ? (
+                  <div className="reviews-loading">
+                    <div className="loader-spinner"></div>
+                    <p>Loading reviews...</p>
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <div className="reviews-empty">
+                    <FaStar className="empty-icon" />
+                    <h3>No Reviews Yet</h3>
+                    <p>Be the first to review this product after purchasing it!</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="reviews-summary">
+                      <div className="reviews-rating-overview">
+                        <div className="rating-large">
+                          <span className="rating-number">{avgRating.toFixed(1)}</span>
+                          <div className="rating-stars-large">
+                            {renderStars(avgRating)}
+                          </div>
+                          <p className="rating-count">Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="reviews-list">
+                      <h3>Customer Reviews</h3>
+                      {reviews.map((review) => (
+                        <div key={review._id} className="review-item">
+                          <div className="review-header">
+                            <div className="review-user">
+                              <div className="review-avatar">
+                                {review.customerName?.charAt(0).toUpperCase() || 'U'}
+                              </div>
+                              <div className="review-user-info">
+                                <div className="review-user-name">
+                                  {review.customerName}
+                                  <span className="verified-badge">
+                                    <FaCheckCircle /> Verified Buyer
+                                  </span>
+                                </div>
+                                <div className="review-meta">
+                                  <span className="review-date">{formatReviewDate(review.createdAt)}</span>
+                                  {review.orderDate && (
+                                    <span className="review-purchase">
+                                      · Purchased on {new Date(review.orderDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="review-rating">
+                              {renderStars(review.rating)}
+                              <span className="rating-text">{review.rating.toFixed(1)}</span>
+                            </div>
+                          </div>
+                          <div className="review-content">
+                            <p>{review.comment}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

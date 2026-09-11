@@ -280,9 +280,324 @@ exports.sendBookingConfirmation = async (booking) => {
 };
 
 /**
+ * Send admin notification email when new order is placed
+ * @param {Object} booking - Booking object with all details
+ * @returns {Promise}
+ */
+exports.sendAdminOrderNotification = async (booking) => {
+  try {
+    if (!process.env.BREVO_API_KEY) {
+      console.warn('⚠️  BREVO_API_KEY not set. Skipping admin email notification.');
+      return { success: false, message: 'Email service not configured' };
+    }
+
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'parthipriya364@gmail.com';
+
+    // Format order items for email
+    const orderItemsHtml = booking.items
+      .map(
+        (item) => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+            <strong>${item.name}</strong><br/>
+            <small style="color: #6b7280;">Size: ${item.size} | Qty: ${item.quantity}</small>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">
+            ₹${item.price.toFixed(2)}
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right;">
+            ₹${(item.price * item.quantity).toFixed(2)}
+          </td>
+        </tr>
+      `
+      )
+      .join('');
+
+    // Format payment method
+    const paymentMethodText =
+      booking.paymentMethod === 'cod'
+        ? 'Cash on Delivery (COD)'
+        : booking.paymentMethod === 'upi'
+        ? 'UPI'
+        : 'Card/Razorpay';
+
+    // Payment status badge color
+    const paymentStatusColor =
+      booking.paymentStatus === 'paid'
+        ? '#10b981'
+        : booking.paymentStatus === 'pending'
+        ? '#f59e0b'
+        : '#ef4444';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Order Notification</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
+                🛍️ New Order Received!
+              </h1>
+              <p style="margin: 10px 0 0; color: #d1fae5; font-size: 14px;">
+                Priya Textiles Admin Notification
+              </p>
+            </td>
+          </tr>
+
+          <!-- Order ID & Date -->
+          <tr>
+            <td style="padding: 30px 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <table width="100%">
+                      <tr>
+                        <td>
+                          <p style="margin: 0 0 4px; color: #047857; font-size: 12px; font-weight: 600;">ORDER ID</p>
+                          <h2 style="margin: 0; color: #065f46; font-size: 20px; font-weight: 700; letter-spacing: 1px;">
+                            #${booking._id.toString().slice(-8).toUpperCase()}
+                          </h2>
+                        </td>
+                        <td style="text-align: right;">
+                          <p style="margin: 0 0 4px; color: #047857; font-size: 12px; font-weight: 600;">DATE & TIME</p>
+                          <p style="margin: 0; color: #065f46; font-size: 14px; font-weight: 600;">
+                            ${new Date(booking.createdAt).toLocaleString('en-IN', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Quick Stats -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="33%" style="padding: 0 5px;">
+                    <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
+                      <p style="margin: 0 0 5px; color: #92400e; font-size: 11px; font-weight: 600;">ITEMS</p>
+                      <p style="margin: 0; color: #78350f; font-size: 20px; font-weight: 700;">${booking.items.length}</p>
+                    </div>
+                  </td>
+                  <td width="33%" style="padding: 0 5px;">
+                    <div style="background-color: #dbeafe; padding: 15px; border-radius: 8px; text-align: center;">
+                      <p style="margin: 0 0 5px; color: #1e40af; font-size: 11px; font-weight: 600;">TOTAL</p>
+                      <p style="margin: 0; color: #1e3a8a; font-size: 20px; font-weight: 700;">₹${booking.total.toFixed(2)}</p>
+                    </div>
+                  </td>
+                  <td width="33%" style="padding: 0 5px;">
+                    <div style="background-color: ${paymentStatusColor === '#10b981' ? '#d1fae5' : '#fef3c7'}; padding: 15px; border-radius: 8px; text-align: center;">
+                      <p style="margin: 0 0 5px; color: ${paymentStatusColor === '#10b981' ? '#065f46' : '#92400e'}; font-size: 11px; font-weight: 600;">PAYMENT</p>
+                      <p style="margin: 0; color: ${paymentStatusColor}; font-size: 14px; font-weight: 700; text-transform: uppercase;">${booking.paymentStatus}</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Customer Info -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <h3 style="margin: 0 0 15px; color: #111827; font-size: 18px; font-weight: 600;">
+                👤 Customer Details
+              </h3>
+              <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px;">
+                <table width="100%">
+                  <tr>
+                    <td style="padding-bottom: 10px;">
+                      <p style="margin: 0 0 5px; color: #6b7280; font-size: 12px;">Name</p>
+                      <p style="margin: 0; color: #111827; font-weight: 600; font-size: 15px;">${booking.customer.name}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 10px;">
+                      <p style="margin: 0 0 5px; color: #6b7280; font-size: 12px;">Email</p>
+                      <p style="margin: 0; color: #111827; font-weight: 600; font-size: 14px;">${booking.customer.email}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 10px;">
+                      <p style="margin: 0 0 5px; color: #6b7280; font-size: 12px;">Phone</p>
+                      <p style="margin: 0; color: #111827; font-weight: 600; font-size: 14px;">${booking.customer.phone}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p style="margin: 0 0 5px; color: #6b7280; font-size: 12px;">Delivery Address</p>
+                      <p style="margin: 0; color: #111827; font-weight: 600; font-size: 14px; line-height: 1.6;">
+                        ${booking.customer.address}<br/>
+                        ${booking.customer.city}, ${booking.customer.state} - ${booking.customer.pincode}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Order Items -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <h3 style="margin: 0 0 15px; color: #111827; font-size: 18px; font-weight: 600;">
+                📦 Order Items
+              </h3>
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; overflow: hidden;">
+                <thead>
+                  <tr style="background-color: #e5e7eb;">
+                    <th style="padding: 12px; text-align: left; color: #374151; font-size: 13px; font-weight: 600;">ITEM</th>
+                    <th style="padding: 12px; text-align: right; color: #374151; font-size: 13px; font-weight: 600;">PRICE</th>
+                    <th style="padding: 12px; text-align: right; color: #374151; font-size: 13px; font-weight: 600;">TOTAL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${orderItemsHtml}
+                </tbody>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Order Summary -->
+          <tr>
+            <td style="padding: 0 30px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; padding: 20px; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Subtotal</td>
+                  <td style="padding: 8px 0; text-align: right; color: #111827; font-weight: 600;">₹${booking.subtotal.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Shipping</td>
+                  <td style="padding: 8px 0; text-align: right; color: #111827; font-weight: 600;">
+                    ${booking.shipping === 0 ? 'FREE' : `₹${booking.shipping.toFixed(2)}`}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0 0; border-top: 2px solid #d1d5db; color: #111827; font-size: 18px; font-weight: 700;">Total Amount</td>
+                  <td style="padding: 15px 0 0; border-top: 2px solid #d1d5db; text-align: right; color: #059669; font-size: 20px; font-weight: 700;">₹${booking.total.toFixed(2)}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Payment Details -->
+          <tr>
+            <td style="padding: 0 30px 30px;">
+              <h3 style="margin: 0 0 15px; color: #111827; font-size: 18px; font-weight: 600;">
+                💳 Payment Information
+              </h3>
+              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; padding: 20px; border-radius: 8px;">
+                <tr>
+                  <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Payment Method</td>
+                  <td style="padding: 5px 0; text-align: right; color: #111827; font-weight: 600;">${paymentMethodText}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Payment Status</td>
+                  <td style="padding: 5px 0; text-align: right;">
+                    <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background-color: ${paymentStatusColor}; color: #ffffff; font-size: 12px; font-weight: 600; text-transform: uppercase;">
+                      ${booking.paymentStatus}
+                    </span>
+                  </td>
+                </tr>
+                ${booking.razorpayPaymentId ? `
+                <tr>
+                  <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Payment ID</td>
+                  <td style="padding: 5px 0; text-align: right; color: #111827; font-family: monospace; font-size: 12px;">${booking.razorpayPaymentId}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Order Status</td>
+                  <td style="padding: 5px 0; text-align: right;">
+                    <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background-color: #3b82f6; color: #ffffff; font-size: 12px; font-weight: 600; text-transform: uppercase;">
+                      ${booking.orderStatus}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Action Button -->
+          <tr>
+            <td style="padding: 0 30px 30px; text-align: center;">
+              <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/admin/orders" 
+                 style="display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);">
+                View in Admin Dashboard →
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0; color: #6b7280; font-size: 12px;">
+                This is an automated admin notification from Priya Textiles
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.sender = {
+      name: 'Priya Textiles - Order System',
+      email: process.env.BREVO_SENDER_EMAIL || 'noreply@priyatextiles.com',
+    };
+    sendSmtpEmail.to = [
+      {
+        email: adminEmail,
+        name: 'Priya Textiles Admin',
+      },
+    ];
+    sendSmtpEmail.subject = `🛍️ New Order #${booking._id.toString().slice(-8).toUpperCase()} - ₹${booking.total.toFixed(2)}`;
+    sendSmtpEmail.htmlContent = htmlContent;
+
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('✅ Admin notification email sent to', adminEmail, ':', result.messageId);
+
+    return {
+      success: true,
+      messageId: result.messageId,
+    };
+  } catch (error) {
+    console.error('❌ Failed to send admin notification email:', error.message);
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
+/**
  * Send order status update email
- * @param {Object} booking - Updated booking object
- * @param {String} oldStatus - Previous status
+ * @param {Object} booking - Booking object with updated status
+ * @param {String} oldStatus - Previous order status
  * @returns {Promise}
  */
 exports.sendOrderStatusUpdate = async (booking, oldStatus) => {

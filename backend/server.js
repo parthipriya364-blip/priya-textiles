@@ -65,6 +65,9 @@ io.on('connection', (socket) => {
   socket.on('join-admin-room', () => {
     socket.join('admin-room');
     console.log('✅ Admin joined admin room');
+    
+    // Send confirmation back to client
+    socket.emit('room-joined', { room: 'admin-room', success: true });
   });
 
   // Join specific order room
@@ -81,6 +84,15 @@ io.on('connection', (socket) => {
       socket.leave(`order-${orderId}`);
       console.log(`👋 Left order room: ${orderId}`);
     }
+  });
+
+  // Handle test notifications from frontend test page
+  socket.on('test-notification', ({ type, payload }) => {
+    console.log(`🧪 Test notification received: ${type}`, payload);
+    
+    // Broadcast to admin room
+    io.to('admin-room').emit(type, payload);
+    console.log(`📡 Broadcasted ${type} to admin-room`);
   });
 
   socket.on('disconnect', () => {

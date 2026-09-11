@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { getStoredUser } from "../services/authService";
+import { getPublicSettings } from "../services/settingsService";
 import {
   getRazorpayKey,
   createRazorpayOrder,
@@ -26,6 +27,12 @@ export default function Checkout() {
     cod: true,
   });
   
+  // Shipping configuration from admin settings
+  const [shippingConfig, setShippingConfig] = useState({
+    shippingCharge: 149,
+    freeShippingThreshold: 2999,
+  });
+  
   const [customerData, setCustomerData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -36,10 +43,30 @@ export default function Checkout() {
     pincode: user?.address?.zipCode || "",
   });
 
-  // Calculate totals
+  // Calculate totals using admin-configured shipping
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = subtotal > 1000 ? 0 : 50;
+  const shipping = subtotal >= shippingConfig.freeShippingThreshold ? 0 : shippingConfig.shippingCharge;
   const total = subtotal + shipping;
+
+  useEffect(() => {
+    // Fetch shipping configuration from admin settings
+    const fetchShippingConfig = async () => {
+      try {
+        const response = await getPublicSettings();
+        if (response.success && response.settings) {
+          setShippingConfig({
+            shippingCharge: response.settings.shippingCharge || 149,
+            freeShippingThreshold: response.settings.freeShippingThreshold || 2999,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch shipping config:', error);
+        // Use default values if fetch fails
+      }
+    };
+
+    fetchShippingConfig();
+  }, []);
 
   useEffect(() => {
     if (items.length === 0) {
@@ -587,9 +614,9 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {subtotal < 1000 && (
+              {subtotal < shippingConfig.freeShippingThreshold && (
                 <div className="shipping-note">
-                  <p>Add ₹{(1000 - subtotal).toFixed(2)} more for FREE shipping!</p>
+                  <p>Add ₹{(shippingConfig.freeShippingThreshold - subtotal).toFixed(2)} more for FREE shipping!</p>
                 </div>
               )}
             </div>

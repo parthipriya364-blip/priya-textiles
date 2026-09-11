@@ -37,6 +37,7 @@
   padding: 10px 18px;
   color: var(--c-gray);
   transition: 0.25s;
+  position: relative;
 }
 
 .admin-search:focus-within {
@@ -52,6 +53,103 @@
   font-family: var(--f-body);
   font-size: 13.5px;
   color: var(--c-ink);
+}
+
+/* Search Suggestions Dropdown */
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--c-white);
+  border-radius: var(--r-md, 14px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--c-border);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--c-border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.search-suggestion-item:hover {
+  background: var(--c-cream);
+}
+
+.suggestion-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-cream);
+  border-radius: 10px;
+}
+
+.suggestion-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-title {
+  font-family: var(--f-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-ink);
+  margin-bottom: 2px;
+}
+
+.suggestion-desc {
+  font-family: var(--f-body);
+  font-size: 12px;
+  color: var(--c-gray);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-no-results {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--c-gray);
+}
+
+.search-no-results p {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-ink);
+  margin-bottom: 4px;
+}
+
+.search-no-results span {
+  font-size: 12px;
+  color: var(--c-gray);
 }
 
 .admin-navbar-right {
@@ -102,6 +200,23 @@
   border: 2px solid var(--c-white);
 }
 
+.connection-indicator {
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid var(--c-white);
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 .admin-profile-btn {
   display: flex;
   align-items: center;
@@ -145,9 +260,15 @@
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--c-border);
   min-width: 260px;
+  max-height: 500px;
   overflow: hidden;
   animation: dropIn 0.2s ease both;
   z-index: 200;
+}
+
+.notif-panel {
+  min-width: 380px;
+  max-width: 420px;
 }
 
 @keyframes dropIn {
@@ -165,8 +286,31 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.notif-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.notif-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--c-gray);
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.notif-action-btn:hover {
+  background: var(--c-cream);
+  color: var(--c-ink);
 }
 
 .profile-panel .dropdown-header strong {
@@ -176,6 +320,11 @@
   letter-spacing: 0;
 }
 
+.profile-panel .dropdown-header {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .profile-panel .dropdown-header span {
   font-size: 12px;
   color: var(--c-gray);
@@ -183,24 +332,123 @@
   font-weight: 400;
 }
 
+.notif-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.notif-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-list::-webkit-scrollbar-track {
+  background: var(--c-cream);
+}
+
+.notif-list::-webkit-scrollbar-thumb {
+  background: var(--c-border);
+  border-radius: 3px;
+}
+
+.notif-list::-webkit-scrollbar-thumb:hover {
+  background: var(--c-gray);
+}
+
+.notif-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--c-gray);
+}
+
+.notif-empty p {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-ink);
+  margin-bottom: 4px;
+}
+
+.notif-empty span {
+  font-size: 12px;
+  color: var(--c-gray);
+}
+
 .notif-item {
-  padding: 12px 18px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--c-border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notif-item:hover {
+  background: var(--c-cream);
+}
+
+.notif-item.unread {
+  background: #fef3f2;
+}
+
+.notif-item.unread:hover {
+  background: #fde8e6;
+}
+
+.notif-item.read {
+  opacity: 0.7;
 }
 
 .notif-item:last-child {
   border-bottom: none;
 }
 
-.notif-item p {
+.notif-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-cream);
+  border-radius: 10px;
+}
+
+.notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-title {
+  font-family: var(--f-body);
   font-size: 13px;
+  font-weight: 600;
   color: var(--c-ink);
   margin-bottom: 4px;
 }
 
-.notif-item span {
+.notif-item p {
+  font-size: 12.5px;
+  color: var(--c-ink);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.notif-time {
   font-size: 11px;
   color: var(--c-gray);
+  font-style: italic;
+}
+
+.notif-unread-dot {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 8px;
+  height: 8px;
+  background: var(--c-maroon);
+  border-radius: 50%;
 }
 
 .dropdown-item {
@@ -222,11 +470,30 @@
 @media (max-width: 992px) {
   .menu-btn { display: flex; }
   .admin-search { display: none; }
+  .notif-panel {
+    min-width: 320px;
+    max-width: 90vw;
+  }
 }
 
 @media (max-width: 560px) {
   .profile-name { display: none; }
   .admin-navbar { padding: 0 16px; gap: 12px; }
+  .notif-panel {
+    min-width: 280px;
+    right: -10px;
+  }
+  .notif-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+  .notif-title {
+    font-size: 12px;
+  }
+  .notif-item p {
+    font-size: 11.5px;
+  }
 }
 
 /* Store logo in admin navbar */
