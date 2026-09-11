@@ -6,8 +6,6 @@ export default function BannerForm({ initialData, onSubmit, submitLabel = "Save"
   const { showToast } = useToast();
   
   const [form, setForm] = useState({
-    title: '',
-    subtitle: '',
     link: '',
   });
 
@@ -17,8 +15,6 @@ export default function BannerForm({ initialData, onSubmit, submitLabel = "Save"
   useEffect(() => {
     if (initialData) {
       setForm({
-        title: initialData.title || '',
-        subtitle: initialData.subtitle || '',
         link: initialData.link || '',
       });
       if (initialData.image?.url) {
@@ -48,12 +44,6 @@ export default function BannerForm({ initialData, onSubmit, submitLabel = "Save"
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validation
-    if (!form.title) {
-      showToast('Please provide a banner title', 'error');
-      return;
-    }
-
     if (!initialData && !mainImage) {
       showToast('Please upload a banner image', 'error');
       return;
@@ -61,8 +51,6 @@ export default function BannerForm({ initialData, onSubmit, submitLabel = "Save"
 
     // Prepare data
     const formData = {
-      title: form.title,
-      subtitle: form.subtitle,
       link: form.link,
     };
 
@@ -75,33 +63,6 @@ export default function BannerForm({ initialData, onSubmit, submitLabel = "Save"
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="form-row">
-        <div className="admin-form-group">
-          <label>Banner Title *</label>
-          <input
-            type="text"
-            value={form.title}
-            onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
-            placeholder="e.g., Summer Collection 2026"
-            required
-            disabled={submitting}
-          />
-          <small style={{ color: '#666' }}>Main heading text displayed on the banner</small>
-        </div>
-      </div>
-
-      <div className="admin-form-group">
-        <label>Banner Subtitle</label>
-        <input
-          type="text"
-          value={form.subtitle}
-          onChange={(e) => setForm(f => ({ ...f, subtitle: e.target.value }))}
-          placeholder="e.g., Where heritage meets modern luxury"
-          disabled={submitting}
-        />
-        <small style={{ color: '#666' }}>Optional subtitle or tagline</small>
-      </div>
-
       <div className="form-row">
         <div className="admin-form-group">
           <label>Banner Link (Optional)</label>

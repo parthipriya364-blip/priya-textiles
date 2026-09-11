@@ -31,8 +31,6 @@ export const createBanner = async (bannerData) => {
   try {
     const formData = new FormData();
     
-    formData.append('title', bannerData.title);
-    if (bannerData.subtitle) formData.append('subtitle', bannerData.subtitle);
     if (bannerData.link) formData.append('link', bannerData.link);
     if (bannerData.image) formData.append('image', bannerData.image);
 
@@ -54,8 +52,6 @@ export const updateBanner = async (id, bannerData) => {
   try {
     const formData = new FormData();
     
-    if (bannerData.title) formData.append('title', bannerData.title);
-    if (bannerData.subtitle !== undefined) formData.append('subtitle', bannerData.subtitle);
     if (bannerData.link !== undefined) formData.append('link', bannerData.link);
     if (bannerData.enabled !== undefined) formData.append('enabled', bannerData.enabled);
     if (bannerData.image) formData.append('image', bannerData.image);

@@ -100,8 +100,6 @@ export default function BannerManager() {
 
               <div className="banner-row-info">
                 <strong>Banner {i + 1}</strong>
-                <span>{banner.title || "Untitled banner"}</span>
-                {banner.subtitle && <small>{banner.subtitle}</small>}
               </div>
 
               <div className="banner-row-actions">
@@ -165,13 +163,12 @@ export default function BannerManager() {
       <Modal
         open={!!previewBanner}
         onClose={() => setPreviewBanner(null)}
-        title={previewBanner?.title || "Banner Preview"}
+        title="Banner Preview"
         size="lg"
       >
         {previewBanner && (
           <div className="banner-preview-modal">
-            <img src={previewBanner.image?.url || previewBanner.image} alt={previewBanner.title} />
-            {previewBanner.subtitle && <p>{previewBanner.subtitle}</p>}
+            <img src={previewBanner.image?.url || previewBanner.image} alt="Banner" />
             {previewBanner.link && <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#666' }}>
               Link: {previewBanner.link}
             </p>}

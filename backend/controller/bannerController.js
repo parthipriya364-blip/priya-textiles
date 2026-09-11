@@ -63,15 +63,7 @@ exports.getBanner = async (req, res) => {
 // @access  Private/Admin
 exports.createBanner = async (req, res) => {
   try {
-    const { title, subtitle, link } = req.body;
-
-    // Validate required fields
-    if (!title) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a banner title',
-      });
-    }
+    const { link } = req.body;
 
     // Check banner limit
     const bannerCount = await Banner.countDocuments();
@@ -100,8 +92,6 @@ exports.createBanner = async (req, res) => {
 
     // Create banner
     const banner = await Banner.create({
-      title,
-      subtitle: subtitle || null,
       image: imageData,
       link: link || null,
       order: nextOrder,
@@ -136,12 +126,10 @@ exports.updateBanner = async (req, res) => {
       });
     }
 
-    const { title, subtitle, link, enabled } = req.body;
+    const { link, enabled } = req.body;
 
     // Prepare update data
     const updateData = {};
-    if (title !== undefined) updateData.title = title;
-    if (subtitle !== undefined) updateData.subtitle = subtitle || null;
     if (link !== undefined) updateData.link = link || null;
     if (enabled !== undefined) updateData.enabled = enabled === 'true' || enabled === true;
 

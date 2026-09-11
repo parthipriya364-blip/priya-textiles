@@ -36,13 +36,13 @@ export function BannerProvider({ children }) {
     [banners]
   );
 
-  const addBanner = async ({ image, title = "", subtitle = "", link = "" }) => {
+  const addBanner = async ({ image, link = "" }) => {
     if (banners.length >= MAX_BANNERS) {
       return { ok: false, error: `Maximum of ${MAX_BANNERS} banners allowed.` };
     }
 
     try {
-      const data = await createBanner({ image, title, subtitle, link });
+      const data = await createBanner({ image, link });
       setBanners((prev) => [...prev, data.banner]);
       showToast?.(data.message || 'Banner added successfully', 'success');
       return { ok: true };
