@@ -6,20 +6,56 @@ const { sendTokenResponse } = require('../utils/jwt');
 // @access  Private/Admin
 exports.getUsers = async (req, res) => {
   try {
+    const Booking = require('../models/Booking');
+    
+    console.log('📊 Fetching users with order statistics...');
+    
     const users = await User.find({ role: 'user' })
       .select('name email phone address.city createdAt lastLogin isActive')
       .sort({ createdAt: -1 });
 
+    console.log(`✅ Found ${users.length} users`);
+
+    // Calculate order count and total purchase for each user
+    const usersWithStats = await Promise.all(
+      users.map(async (user) => {
+        const userObj = user.toObject();
+        
+        // Get all bookings for this user (including pending and paid)
+        const allBookings = await Booking.find({ 
+          user: user._id
+        });
+        
+        // Get only paid/completed bookings for revenue calculation
+        const paidBookings = allBookings.filter(
+          booking => booking.paymentStatus === 'paid' || booking.orderStatus === 'delivered'
+        );
+        
+        // Calculate stats
+        userObj.orderCount = allBookings.length; // Total orders
+        userObj.totalPurchase = paidBookings.reduce((sum, booking) => sum + (booking.total || 0), 0);
+        
+        if (allBookings.length > 0) {
+          console.log(`   User: ${user.name} - Orders: ${allBookings.length}, Total: ₹${userObj.totalPurchase}`);
+        }
+        
+        return userObj;
+      })
+    );
+
+    console.log('✅ User statistics calculated successfully');
+
     res.status(200).json({
       success: true,
-      count: users.length,
-      users,
+      count: usersWithStats.length,
+      users: usersWithStats,
     });
   } catch (error) {
-    console.error('Get users error:', error);
+    console.error('❌ Get users error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch users',
+      error: error.message,
     });
   }
 };

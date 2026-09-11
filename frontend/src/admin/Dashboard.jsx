@@ -17,6 +17,7 @@ import { getProducts } from "../services/productService";
 import { getUsers } from "../services/authService";
 import { getCategories } from "../services/categoryService";
 import { getAllBookings } from "../services/paymentService";
+import { getAllReviews } from "../services/reviewService";
 import "./admin-forms.css";
 import "./Dashboard.css";
 
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [customers, setCustomers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,17 +45,19 @@ export default function Dashboard() {
 
   const loadDashboardData = async () => {
     try {
-      const [productsData, usersData, categoriesData, bookingsData] = await Promise.all([
+      const [productsData, usersData, categoriesData, bookingsData, reviewsData] = await Promise.all([
         getProducts(),
         getUsers(),
         getCategories(),
         getAllBookings(),
+        getAllReviews(),
       ]);
       
       setProducts(productsData.products || []);
       setCustomers(usersData.users || []);
       setCategories(categoriesData.categories || []);
       setBookings(bookingsData.bookings || []);
+      setReviews(reviewsData.reviews || []);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {
@@ -75,11 +79,20 @@ export default function Dashboard() {
     const shippedOrders = bookings.filter(b => b.orderStatus === 'shipped').length;
     const confirmedOrders = bookings.filter(b => b.orderStatus === 'confirmed').length;
     
+    // Total reviews count from actual reviews
+    const totalReviews = reviews.length;
+    
+    // Calculate average rating
+    const avgRating = reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+      : 0;
+    
     return {
       products: activeProducts.length,
       totalProducts: products.length,
       customers: customers.length,
-      reviews: products.reduce((total, product) => total + (product.reviewsCount || 0), 0),
+      reviews: totalReviews,
+      avgRating,
       lowStock: products.filter((product) => product.stock > 0 && product.stock <= 5).length,
       outOfStock: products.filter((product) => product.stock === 0).length,
       totalStock,
@@ -90,7 +103,7 @@ export default function Dashboard() {
       shippedOrders,
       confirmedOrders,
     };
-  }, [customers, products, bookings]);
+  }, [customers, products, bookings, reviews]);
 
   const categoryData = useMemo(() => {
     if (products.length === 0) return [];
@@ -202,6 +215,7 @@ export default function Dashboard() {
           icon={<FaStar />}
           label="Total Reviews"
           value={loading ? "..." : stats.reviews}
+          trend={stats.avgRating > 0 ? `${stats.avgRating} ⭐ avg rating` : "No reviews yet"}
           tone="black"
         />
       </div>

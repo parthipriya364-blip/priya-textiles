@@ -77,7 +77,9 @@ export const signup = async (userData) => {
     
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('userChanged'));
     }
     
     return response.data;
@@ -93,7 +95,9 @@ export const login = async (credentials) => {
     
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('userChanged'));
     }
     
     return response.data;
@@ -108,7 +112,7 @@ export const getCurrentUser = async () => {
     const response = await axios.get(`${API_URL}/me`);
     
     if (response.data.success) {
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -134,7 +138,7 @@ export const updatePassword = async (passwords) => {
     
     if (response.data.success && response.data.token) {
       setAuthToken(response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
     }
     
     return response.data;
@@ -149,7 +153,9 @@ export const updateProfile = async (profileData) => {
     const response = await axios.put(`${API_URL}/updateprofile`, profileData);
     
     if (response.data.success) {
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('userChanged'));
     }
     
     return response.data;
@@ -161,10 +167,15 @@ export const updateProfile = async (profileData) => {
 // Logout
 export const logout = async () => {
   try {
-    await axios.post(`${API_URL}/logout`);    return response.data;  } catch (error) {
+    await axios.post(`${API_URL}/logout`);
+  } catch (error) {
     console.error('Logout error:', error);
   } finally {
     clearAuth();
+    // Also clear the old 'user' key if it exists
+    localStorage.removeItem('user');
+    // Dispatch custom event to notify components
+    window.dispatchEvent(new Event('userChanged'));
   }
 };
 

@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { FaTrashAlt, FaShoppingBag, FaArrowRight } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
 import QuantitySelector from "../components/QuantitySelector";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
+import { getPublicSettings } from "../services/settingsService";
 import { formatPrice } from "../utils/formatPrice";
 import "./style/Cart.css";
 
@@ -12,7 +14,33 @@ export default function Cart() {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const shipping = subtotal >= 2999 || subtotal === 0 ? 0 : 149;
+  // Shipping configuration from admin settings
+  const [shippingConfig, setShippingConfig] = useState({
+    shippingCharge: 149,
+    freeShippingThreshold: 2999,
+  });
+
+  useEffect(() => {
+    // Fetch shipping configuration from admin settings
+    const fetchShippingConfig = async () => {
+      try {
+        const response = await getPublicSettings();
+        if (response.success && response.settings) {
+          setShippingConfig({
+            shippingCharge: response.settings.shippingCharge || 149,
+            freeShippingThreshold: response.settings.freeShippingThreshold || 2999,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch shipping config:', error);
+        // Use default values if fetch fails
+      }
+    };
+
+    fetchShippingConfig();
+  }, []);
+
+  const shipping = subtotal >= shippingConfig.freeShippingThreshold || subtotal === 0 ? 0 : shippingConfig.shippingCharge;
   const total = subtotal + shipping;
 
   return (

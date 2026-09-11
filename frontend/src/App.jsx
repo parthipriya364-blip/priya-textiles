@@ -49,6 +49,7 @@ import Settings from "./admin/Settings";
 import BannerManager from "./admin/BannerManager";
 import AddBanner from "./admin/AddBanner";
 import EditBanner from "./admin/EditBanner";
+import TestNotifications from "./admin/TestNotifications";
 
 // Component to conditionally render FloatingContact
 function ConditionalFloatingContact() {
@@ -73,72 +74,73 @@ export default function App() {
     <AuthProvider>
       <ToastProvider>
         <SettingsProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <BannerProvider>
-              <SubCategoryProvider>
-                <SocketProvider>
-                <BrowserRouter
-                  future={{
-                    v7_startTransition: true,
-                    v7_relativeSplatPath: true,
-                  }}
-                >
-                  {/* Conditional floating contact bar — only shows on customer pages, not admin */}
-                  <ConditionalFloatingContact />
-                  <Routes>
-                    {/* ---------- Customer storefront ---------- */}
-                    <Route element={<Layout />}>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/women" element={<Women />} />
-                      <Route path="/women/:subCategorySlug" element={<WomenProducts />} />
-                      <Route path="/men" element={<Men />} />
-                      <Route path="/kids" element={<Kids />} />
-                      <Route path="/combo" element={<Combo />} />
-                      <Route path="/new" element={<NewArrivalsPage />} />
-                      <Route path="/product/:id" element={<ProductDetails />} />
-                      <Route path="/wishlist" element={<Wishlist />} />
-                      <Route path="/cart" element={<Cart />} />
-                      <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/order-success/:bookingId" element={<OrderSuccess />} />
-                      <Route path="/orders" element={<OrderHistory />} />
-                      <Route path="/order-details/:bookingId" element={<OrderDetails />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
-                      <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/contact" element={<Contact />} />
-                      <Route path="/about" element={<About />} />
-                    </Route>
+          <CartProvider>
+            <WishlistProvider>
+              <BannerProvider>
+                <SubCategoryProvider>
+                  <SocketProvider>
+                    <BrowserRouter
+                      future={{
+                        v7_startTransition: true,
+                        v7_relativeSplatPath: true,
+                      }}
+                    >
+                      {/* Conditional floating contact bar — only shows on customer pages, not admin */}
+                      <ConditionalFloatingContact />
+                      <Routes>
+                        {/* ---------- Customer storefront ---------- */}
+                        <Route element={<Layout />}>
+                          <Route path="/" element={<Home />} />
+                          <Route path="/women" element={<Women />} />
+                          <Route path="/women/:subCategorySlug" element={<WomenProducts />} />
+                          <Route path="/men" element={<Men />} />
+                          <Route path="/kids" element={<Kids />} />
+                          <Route path="/combo" element={<Combo />} />
+                          <Route path="/new" element={<NewArrivalsPage />} />
+                          <Route path="/product/:id" element={<ProductDetails />} />
+                          <Route path="/wishlist" element={<Wishlist />} />
+                          <Route path="/cart" element={<Cart />} />
+                          <Route path="/checkout" element={<Checkout />} />
+                          <Route path="/order-success/:bookingId" element={<OrderSuccess />} />
+                          <Route path="/orders" element={<OrderHistory />} />
+                          <Route path="/order-details/:bookingId" element={<OrderDetails />} />
+                          <Route path="/login" element={<Login />} />
+                          <Route path="/register" element={<Register />} />
+                          <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/contact" element={<Contact />} />
+                          <Route path="/about" element={<About />} />
+                        </Route>
 
-                    {/* ---------- Admin dashboard (protected routes) ---------- */}
-                    <Route path="/admin" element={<ProtectedRoute />}>
-                      <Route element={<AdminLayout />}>
-                        <Route index element={<Dashboard />} />
-                        <Route path="dashboard" element={<Dashboard />} />
-                        <Route path="products" element={<Products />} />
-                        <Route path="products/add" element={<AddProduct />} />
-                        <Route path="products/edit/:id" element={<EditProduct />} />
-                        <Route path="categories" element={<Categories />} />
-                        <Route path="orders" element={<Orders />} />
-                        <Route path="customers" element={<Customers />} />
-                        <Route path="reviews" element={<Reviews />} />
-                        <Route path="revenue" element={<Revenue />} />
-                        <Route path="settings" element={<Settings />} />
-                        <Route path="banners" element={<BannerManager />} />
-                        <Route path="banners/add" element={<AddBanner />} />
-                        <Route path="banners/edit/:id" element={<EditBanner />} />
-                      </Route>
-                    </Route>
+                        {/* ---------- Admin dashboard (protected routes) ---------- */}
+                        <Route path="/admin" element={<ProtectedRoute />}>
+                          <Route element={<AdminLayout />}>
+                            <Route index element={<Dashboard />} />
+                            <Route path="dashboard" element={<Dashboard />} />
+                            <Route path="products" element={<Products />} />
+                            <Route path="products/add" element={<AddProduct />} />
+                            <Route path="products/edit/:id" element={<EditProduct />} />
+                            <Route path="categories" element={<Categories />} />
+                            <Route path="orders" element={<Orders />} />
+                            <Route path="customers" element={<Customers />} />
+                            <Route path="reviews" element={<Reviews />} />
+                            <Route path="revenue" element={<Revenue />} />
+                            <Route path="settings" element={<Settings />} />
+                            <Route path="banners" element={<BannerManager />} />
+                            <Route path="banners/add" element={<AddBanner />} />
+                            <Route path="banners/edit/:id" element={<EditBanner />} />
+                            <Route path="test-notifications" element={<TestNotifications />} />
+                          </Route>
+                        </Route>
 
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-                </SocketProvider>
-              </SubCategoryProvider>
-            </BannerProvider>
-          </WishlistProvider>
-        </CartProvider>
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </BrowserRouter>
+                  </SocketProvider>
+                </SubCategoryProvider>
+              </BannerProvider>
+            </WishlistProvider>
+          </CartProvider>
         </SettingsProvider>
       </ToastProvider>
     </AuthProvider>

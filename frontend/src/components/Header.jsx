@@ -23,14 +23,35 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const { totalItems } = useCart();
   const { wishlist } = useWishlist();
   const { settings } = useSettings();
   const navigate = useNavigate();
 
-  // Get user from auth service
-  const user = getStoredUser();
+  // Get user from auth service and listen for changes
   const isLoggedIn = isAuthenticated();
+
+  // Update user state when component mounts or when login status changes
+  useEffect(() => {
+    const updateUser = () => {
+      const storedUser = getStoredUser();
+      setUser(storedUser);
+    };
+
+    updateUser();
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener('storage', updateUser);
+    
+    // Custom event listener for login/logout in same tab
+    window.addEventListener('userChanged', updateUser);
+
+    return () => {
+      window.removeEventListener('storage', updateUser);
+      window.removeEventListener('userChanged', updateUser);
+    };
+  }, [isLoggedIn]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);

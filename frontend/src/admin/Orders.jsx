@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FaEye, FaPrint, FaEdit, FaSpinner } from "react-icons/fa";
 import AdminPageHeader from "./components/AdminPageHeader";
 import SearchBar from "./components/SearchBar";
@@ -31,6 +32,7 @@ const paymentBadge = (status) => {
 };
 
 export default function Orders() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -43,6 +45,20 @@ export default function Orders() {
   useEffect(() => {
     loadBookings();
   }, []);
+
+  useEffect(() => {
+    const orderId = searchParams.get("orderId");
+    if (!orderId || loading || viewOrder) return;
+
+    const matchingOrder = bookings.find((booking) =>
+      booking._id === orderId || booking._id?.endsWith(orderId)
+    );
+
+    if (matchingOrder) {
+      setViewOrder(matchingOrder);
+      setSearchParams({}, { replace: true });
+    }
+  }, [bookings, loading, searchParams, setSearchParams, viewOrder]);
 
   const loadBookings = async () => {
     try {
