@@ -26,7 +26,7 @@ export default function HeroSlider({ className = "" }) {
   useEffect(() => {
     slides.forEach((slide) => {
       const img = new Image();
-      img.src = slide.image?.url || slide.image;
+      img.src = slide.image;
     });
   }, [slides]);
 
@@ -66,7 +66,7 @@ export default function HeroSlider({ className = "" }) {
       {slides.map((slide, i) => (
         <Fragment key={slide._id || slide.id}>
           <img
-            src={slide.image?.url || slide.image}
+          src={slide.image?.url || slide.image}
           alt="Priya Textiles banner"
           className={`hero-slide ${i === index ? "active" : ""}`}
           loading={i === 0 ? "eager" : "lazy"}
