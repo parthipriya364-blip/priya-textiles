@@ -73,16 +73,6 @@ export default function HeroSlider({ className = "" }) {
           fetchpriority={i === 0 ? "high" : "auto"}
           decoding="async"
           />
-          {(slide.title || slide.subtitle) && (
-            <a
-              className={`hero-slide-content ${i === index ? "active" : ""}`}
-              href={slide.link || undefined}
-              onClick={(event) => { if (!slide.link) event.preventDefault(); }}
-            >
-              {slide.title && <h2>{slide.title}</h2>}
-              {slide.subtitle && <p>{slide.subtitle}</p>}
-            </a>
-          )}
         </Fragment>
       ))}
 
