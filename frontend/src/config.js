@@ -6,6 +6,12 @@ const normalizeBaseUrl = (value, fallback = "/api") => {
 const isVercelDeployment =
   typeof window !== "undefined" && /vercel\.app$/i.test(window.location.hostname);
 
+const isLocalBrowser =
+  typeof window !== "undefined" && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+
+const configuredApiBase = import.meta.env.VITE_API_URL;
+const isLocalApi = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(configuredApiBase || "");
+
 const DEFAULT_API_BASE = isVercelDeployment
   ? "https://priya-textiles.onrender.com/api"
   : "/api";
@@ -17,7 +23,9 @@ const DEFAULT_SOCKET_BASE = isVercelDeployment
     : (typeof window !== "undefined" ? window.location.origin : "");
 
 export const API_BASE_URL = normalizeBaseUrl(
-  import.meta.env.VITE_API_URL || DEFAULT_API_BASE,
+  configuredApiBase && (!isLocalApi || isLocalBrowser)
+    ? configuredApiBase
+    : DEFAULT_API_BASE,
   DEFAULT_API_BASE
 );
 export const SOCKET_BASE_URL = normalizeBaseUrl(
@@ -38,8 +46,7 @@ export function getSocketUrl(path = "") {
 }
 
 export function getGoogleAuthUrl() {
-  const apiBase = import.meta.env.VITE_API_URL || DEFAULT_API_BASE;
-  const origin = apiBase.replace(/\/api$/, "") || DEFAULT_SOCKET_BASE || "http://localhost:5000";
+  const origin = API_BASE_URL.replace(/\/api$/, "") || DEFAULT_SOCKET_BASE || "http://localhost:5000";
 
   return `${origin}/api/auth/google`;
 }
