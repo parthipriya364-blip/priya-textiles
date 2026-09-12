@@ -34,16 +34,6 @@ const settingsSchema = new mongoose.Schema({
     maxlength: 1000,
   },
   
-  // Logo
-  logo: {
-    type: String,
-    default: '',
-  },
-  logoPublicId: {
-    type: String,
-    default: '',
-  },
-  
   // Social Media
   instagram: {
     type: String,

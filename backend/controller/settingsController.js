@@ -1,5 +1,4 @@
 const Settings = require('../models/Settings');
-const { cloudinary, uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 // @desc    Get settings
 // @route   GET /api/settings
@@ -57,101 +56,6 @@ exports.updateSettings = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update settings',
-      error: error.message,
-    });
-  }
-};
-
-// @desc    Upload logo
-// @route   POST /api/settings/logo
-// @access  Private/Admin
-exports.uploadLogo = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please upload a logo image',
-      });
-    }
-
-    // Get current settings
-    const settings = await Settings.getSettings();
-
-    // Delete old logo from Cloudinary if exists
-    if (settings.logoPublicId) {
-      try {
-        await deleteFromCloudinary(settings.logoPublicId);
-      } catch (err) {
-        console.error('Failed to delete old logo:', err);
-      }
-    }
-
-    // Upload new logo to Cloudinary using buffer (memoryStorage)
-    const imageStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    const imageData = await uploadToCloudinary(imageStr, 'settings');
-
-    // Update settings with new logo
-    settings.logo = imageData.url;
-    settings.logoPublicId = imageData.public_id;
-    settings.lastUpdatedBy = req.user.id;
-    await settings.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Logo uploaded successfully',
-      logo: imageData.url,
-      settings,
-    });
-    
-  } catch (error) {
-    console.error('Upload logo error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to upload logo',
-      error: error.message,
-    });
-  }
-};
-
-// @desc    Delete logo
-// @route   DELETE /api/settings/logo
-// @access  Private/Admin
-exports.deleteLogo = async (req, res) => {
-  try {
-    const settings = await Settings.getSettings();
-
-    if (!settings.logo) {
-      return res.status(400).json({
-        success: false,
-        message: 'No logo to delete',
-      });
-    }
-
-    // Delete from Cloudinary
-    try {
-      if (settings.logoPublicId) {
-        await deleteFromCloudinary(settings.logoPublicId);
-      }
-    } catch (err) {
-      console.error('Failed to delete logo from Cloudinary:', err);
-    }
-
-    // Remove logo from settings
-    settings.logo = '';
-    settings.logoPublicId = '';
-    settings.lastUpdatedBy = req.user.id;
-    await settings.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Logo deleted successfully',
-      settings,
-    });
-  } catch (error) {
-    console.error('Delete logo error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete logo',
       error: error.message,
     });
   }
