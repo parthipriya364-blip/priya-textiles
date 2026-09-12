@@ -16,17 +16,21 @@ const passport = require('./config/passport');
 const app = express();
 const server = http.createServer(app);
 
+const normalizeOrigin = (origin) => origin?.trim().replace(/\/$/, '');
+
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  'www.priyatextiles.com',
+  ...(process.env.CORS_ORIGINS || '').split(','),
+  'https://www.priyatextiles.com',
+  'https://priyatextiles.com',
   'https://priya-textiles-e6q47ehph-priya-4380.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000'
-].filter(Boolean);
+].map(normalizeOrigin).filter(Boolean);
 
 const isAllowedOrigin = (origin) => {
   if (!origin) return true;
-  if (allowedOrigins.includes(origin)) return true;
+  if (allowedOrigins.includes(normalizeOrigin(origin))) return true;
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) return true;
   return /https:\/\/.*\.vercel\.app$/i.test(origin) || /https:\/\/.*\.vercel\.app:\d+$/i.test(origin);
 };
