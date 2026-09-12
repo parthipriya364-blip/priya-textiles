@@ -40,13 +40,22 @@ export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   useEffect(() => {
     loadDashboardData();
+    
+    // Auto-refresh every 30 seconds for real-time stock updates
+    const interval = setInterval(() => {
+      loadDashboardData(true); // Silent refresh
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (silent = false) => {
     try {
+      if (!silent) setLoading(true);
       const [productsData, usersData, categoriesData, bookingsData, reviewsData] = await Promise.all([
         getProducts(),
         getUsers(),
@@ -60,10 +69,23 @@ export default function Dashboard() {
       setCategories(categoriesData.categories || []);
       setBookings(bookingsData.bookings || []);
       setReviews(reviewsData.reviews || []);
+      setLastUpdated(new Date());
+      
+      // Debug: Log low stock products
+      const lowStockProducts = (productsData.products || []).filter((p) => {
+        const stock = Number(p.stock);
+        return !isNaN(stock) && stock > 0 && stock <= 5;
+      });
+      console.log('📦 Low Stock Products:', lowStockProducts.length);
+      console.log('Products with stock:', lowStockProducts.map(p => ({ 
+        name: p.name, 
+        stock: p.stock,
+        stockType: typeof p.stock
+      })));
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -95,8 +117,14 @@ export default function Dashboard() {
       customers: customers.length,
       reviews: totalReviews,
       avgRating,
-      lowStock: products.filter((product) => product.stock > 0 && product.stock <= 5).length,
-      outOfStock: products.filter((product) => product.stock === 0).length,
+      lowStock: products.filter((product) => {
+        const stock = Number(product.stock);
+        return !isNaN(stock) && stock > 0 && stock <= 5;
+      }).length,
+      outOfStock: products.filter((product) => {
+        const stock = Number(product.stock);
+        return stock === 0 || isNaN(stock);
+      }).length,
       totalStock,
       featuredProducts: products.filter(p => p.isFeatured).length,
       newProducts: products.filter(p => p.isNew).length,
@@ -308,76 +336,258 @@ export default function Dashboard() {
       </div>
 
       <div className="admin-grid cols-2 chart-grid">
-        <div className="dashboard-list-card">
-          <h3>Low Stock Products</h3>
+        <div className="dashboard-list-card low-stock-card">
+          <div className="dashboard-section-heading" style={{ marginBottom: '1rem' }}>
+            <div>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaExclamationTriangle style={{ color: 'var(--c-gold-deep)' }} />
+                Low Stock Alert
+                <span style={{ 
+                  display: 'inline-flex', 
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '11px',
+                  fontWeight: '400',
+                  color: '#10b981',
+                  backgroundColor: '#d1fae5',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  marginLeft: '8px'
+                }}>
+                  <span style={{ 
+                    width: '6px', 
+                    height: '6px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#10b981',
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }} />
+                  Live
+                </span>
+              </h3>
+              <span style={{ color: '#666' }}>
+                Products running low on inventory • Updated {new Date(lastUpdated).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+            <Link to="/admin/products?filter=low-stock" className="dashboard-text-link">
+              View All <FaArrowRight />
+            </Link>
+          </div>
           {loading ? (
             <p style={{ padding: '1rem', textAlign: 'center' }}>Loading...</p>
           ) : stats.lowStock > 0 ? (
-            <ul>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {products
-                .filter((p) => p.stock > 0 && p.stock <= 5)
+                .filter((p) => {
+                  const stock = Number(p.stock);
+                  return !isNaN(stock) && stock > 0 && stock <= 5;
+                })
+                .sort((a, b) => {
+                  const stockA = Number(a.stock);
+                  const stockB = Number(b.stock);
+                  return stockA - stockB;
+                })
                 .slice(0, 5)
                 .map((p) => (
-                  <li key={p._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div 
+                    key={p._id} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '1rem',
+                      padding: '12px',
+                      backgroundColor: '#fff9e6',
+                      border: '1px solid #ffd966',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease',
+                      position: 'relative'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fff3cd';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 217, 102, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#fff9e6';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    {p.stock <= 2 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        backgroundColor: '#dc2626',
+                        color: 'white',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)'
+                      }}>
+                        Critical
+                      </div>
+                    )}
                     <img 
                       src={p.image?.url} 
                       alt={p.name}
-                      style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                      style={{ 
+                        width: '60px', 
+                        height: '60px', 
+                        objectFit: 'cover', 
+                        borderRadius: '6px',
+                        border: '2px solid #ffd966'
+                      }}
                     />
-                    <div style={{ flex: 1 }}>
-                      <strong>{p.name}</strong>
-                      <span>{p.categoryName}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        marginBottom: '4px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {p.name}
+                      </div>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: '#666',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <span>{p.categoryName}</span>
+                        <span>•</span>
+                        <span>₹{p.price.toLocaleString('en-IN')}</span>
+                      </div>
                     </div>
-                    <span style={{ 
-                      color: 'var(--c-gold-deep)', 
-                      fontWeight: 'bold',
-                      fontSize: '0.875rem' 
+                    <div style={{ 
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      gap: '4px'
                     }}>
-                      {p.stock} left
-                    </span>
-                  </li>
+                      <span style={{ 
+                        color: p.stock <= 2 ? 'var(--c-maroon-deep)' : 'var(--c-gold-deep)', 
+                        fontWeight: 'bold',
+                        fontSize: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <FaExclamationTriangle style={{ fontSize: '14px' }} />
+                        {p.stock}
+                      </span>
+                      <span style={{ 
+                        fontSize: '11px', 
+                        color: '#888',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {p.stock === 1 ? 'unit left' : 'units left'}
+                      </span>
+                    </div>
+                  </div>
                 ))}
-            </ul>
+            </div>
           ) : (
-            <p style={{ padding: '1rem', textAlign: 'center', color: '#888' }}>
-              All products are well stocked
-            </p>
+            <div style={{ 
+              padding: '2rem', 
+              textAlign: 'center', 
+              backgroundColor: '#f0f9ff',
+              borderRadius: '8px',
+              border: '1px dashed #60a5fa'
+            }}>
+              <FaBoxOpen style={{ fontSize: '40px', color: '#60a5fa', marginBottom: '12px' }} />
+              <p style={{ color: '#1e3a8a', fontWeight: '500', marginBottom: '4px' }}>
+                All products are well stocked
+              </p>
+              <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                No items need restocking at this time ({stats.totalProducts} total products)
+              </span>
+            </div>
           )}
         </div>
 
         <div className="dashboard-list-card">
-          <h3>Featured Products</h3>
+          <div className="dashboard-section-heading" style={{ marginBottom: '1rem' }}>
+            <div>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaBolt style={{ color: 'var(--c-gold)' }} />
+                Featured Products
+              </h3>
+              <span style={{ color: '#666' }}>Highlighted on homepage</span>
+            </div>
+            <Link to="/admin/products?filter=featured" className="dashboard-text-link">
+              View All <FaArrowRight />
+            </Link>
+          </div>
           {loading ? (
             <p style={{ padding: '1rem', textAlign: 'center' }}>Loading...</p>
           ) : stats.featuredProducts > 0 ? (
-            <ul>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {products
                 .filter((p) => p.isFeatured)
                 .slice(0, 5)
                 .map((p) => (
-                  <li key={p._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div 
+                    key={p._id} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '1rem',
+                      padding: '12px',
+                      borderRadius: '6px',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
                     <img 
                       src={p.image?.url} 
                       alt={p.name}
                       style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
                     />
-                    <div style={{ flex: 1 }}>
-                      <strong>{p.name}</strong>
-                      <span>₹{p.price.toLocaleString('en-IN')}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ 
+                        fontWeight: '600', 
+                        fontSize: '14px',
+                        marginBottom: '2px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {p.name}
+                      </div>
+                      <span style={{ fontSize: '13px', color: '#666' }}>
+                        ₹{p.price.toLocaleString('en-IN')}
+                      </span>
                     </div>
                     <span style={{ 
-                      color: p.inStock ? 'var(--c-green)' : 'var(--c-maroon-deep)',
-                      fontSize: '0.875rem'
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      backgroundColor: p.inStock ? '#dcfce7' : '#fee2e2',
+                      color: p.inStock ? '#166534' : '#991b1b'
                     }}>
                       {p.inStock ? 'In Stock' : 'Out of Stock'}
                     </span>
-                  </li>
+                  </div>
                 ))}
-            </ul>
+            </div>
           ) : (
-            <p style={{ padding: '1rem', textAlign: 'center', color: '#888' }}>
-              No featured products yet
-            </p>
+            <div style={{ 
+              padding: '2rem', 
+              textAlign: 'center',
+              color: '#888'
+            }}>
+              <FaBolt style={{ fontSize: '36px', opacity: 0.3, marginBottom: '8px' }} />
+              <p>No featured products yet</p>
+            </div>
           )}
         </div>
       </div>

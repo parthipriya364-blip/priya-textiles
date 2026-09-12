@@ -111,3 +111,65 @@
   .footer-grid { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; text-align: center; }
 }
+
+/* Dark Mode Specific Footer Styles */
+[data-theme="dark"] .site-footer {
+  background: #0a0a0a !important;
+  border-top: 1px solid #2a2a2a;
+}
+
+[data-theme="dark"] .footer-brand .brand-text strong {
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .footer-brand .brand-text em {
+  color: #d4af37 !important;
+}
+
+[data-theme="dark"] .footer-brand p {
+  color: #9ca3af !important;
+}
+
+[data-theme="dark"] .footer-social a {
+  border-color: rgba(229, 229, 229, 0.2) !important;
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .footer-social a:hover {
+  background: #d4af37 !important;
+  border-color: #d4af37 !important;
+  color: #0a0a0a !important;
+}
+
+[data-theme="dark"] .footer-col h4 {
+  color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .footer-col a {
+  color: #9ca3af !important;
+}
+
+[data-theme="dark"] .footer-col a:hover {
+  color: #d4af37 !important;
+}
+
+[data-theme="dark"] .footer-contact p {
+  color: #9ca3af !important;
+}
+
+[data-theme="dark"] .footer-contact svg {
+  color: #d4af37 !important;
+}
+
+[data-theme="dark"] .footer-bottom {
+  color: #6b7280 !important;
+  border-top: 1px solid #2a2a2a;
+}
+
+[data-theme="dark"] .footer-bottom p {
+  color: #6b7280 !important;
+}
+
+[data-theme="dark"] .trim-divider {
+  opacity: 0.3;
+}

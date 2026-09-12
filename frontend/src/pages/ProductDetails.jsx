@@ -248,29 +248,67 @@ export default function ProductDetails() {
 
             {product.colors?.length > 0 && (
               <div className="pd-block">
-                <span className="pd-block-label">Colour</span>
+                <span className="pd-block-label">Available Colours</span>
                 <div className="pd-colors">
-                  {product.colors.map((color, index) => (
-                    <button
-                      key={index}
-                      className="pd-color-circle"
-                      title={color}
-                      style={{
-                        background:
-                          color.toLowerCase() === "maroon"
-                            ? "#6d001a"
-                            : color.toLowerCase() === "gold"
-                            ? "#d4af37"
-                            : color.toLowerCase() === "green"
-                            ? "#0b6e4f"
-                            : color.toLowerCase() === "blue"
-                            ? "#1e5eff"
-                            : color.toLowerCase() === "black"
-                            ? "#111"
-                            : "#ccc",
-                      }}
-                    ></button>
-                  ))}
+                  {product.colors.map((color, index) => {
+                    // Enhanced color mapping
+                    const colorMap = {
+                      'red': '#DC143C',
+                      'pink': '#FF69B4',
+                      'orange': '#FF8C00',
+                      'yellow': '#FFD700',
+                      'green': '#0b6e4f',
+                      'blue': '#1e5eff',
+                      'purple': '#8B008B',
+                      'brown': '#8B4513',
+                      'black': '#111111',
+                      'white': '#FFFFFF',
+                      'gray': '#808080',
+                      'grey': '#808080',
+                      'beige': '#F5F5DC',
+                      'gold': '#d4af37',
+                      'silver': '#C0C0C0',
+                      'maroon': '#6d001a',
+                      'navy': '#000080',
+                      'teal': '#008080',
+                      'olive': '#808000',
+                    };
+                    
+                    const colorLower = color.toLowerCase().trim();
+                    const colorValue = colorMap[colorLower] || '#cccccc';
+                    const isLightColor = ['white', 'beige', 'yellow', 'silver'].includes(colorLower);
+                    
+                    return (
+                      <div
+                        key={index}
+                        className="pd-color-swatch"
+                        title={color}
+                        style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', margin: '0 8px 8px 0' }}
+                      >
+                        <div
+                          className="pd-color-circle"
+                          style={{
+                            background: colorValue,
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            border: isLightColor ? '2px solid #ddd' : '2px solid transparent',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            cursor: 'default',
+                            marginBottom: '6px'
+                          }}
+                        ></div>
+                        <span style={{ 
+                          fontSize: '11px', 
+                          color: '#666',
+                          textTransform: 'capitalize',
+                          fontWeight: '500'
+                        }}>
+                          {color}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

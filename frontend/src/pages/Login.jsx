@@ -39,6 +39,11 @@ export default function Login({ adminOnly = false }) {
       
       showToast("Welcome back!");
       
+      // Force update Header by dispatching another event after cart sync
+      window.dispatchEvent(new CustomEvent('userChanged', { 
+        detail: user 
+      }));
+      
       if (adminOnly && user.role !== 'admin') {
         setErrors({ general: "This login is for administrators only." });
         showToast("Administrator access required.", "error");
@@ -117,7 +122,7 @@ export default function Login({ adminOnly = false }) {
           </div>
 
           <button className="btn btn-google btn-block" onClick={handleGoogleLogin}>
-            <FaGoogle /> Continue with Google
+            <FaGoogle /> Sign with Google
           </button>
 
           <p className="auth-switch">

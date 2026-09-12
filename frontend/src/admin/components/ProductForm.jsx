@@ -3,6 +3,109 @@ import { FaCloudUploadAlt, FaTimes } from "react-icons/fa";
 import { getCategories, getSubCategories } from "../../services/categoryService";
 import { useToast } from "../../context/ToastContext";
 
+// Function to extract dominant colors from an image
+const extractColorsFromImage = (imageFile) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Resize image for faster processing
+        const maxSize = 100;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        const colorMap = {};
+        
+        // Sample pixels and count color frequencies
+        for (let i = 0; i < pixels.length; i += 4 * 4) { // Sample every 4th pixel
+          const r = pixels[i];
+          const g = pixels[i + 1];
+          const b = pixels[i + 2];
+          const a = pixels[i + 3];
+          
+          // Skip transparent or very light/dark pixels
+          if (a < 125 || (r > 240 && g > 240 && b > 240) || (r < 20 && g < 20 && b < 20)) {
+            continue;
+          }
+          
+          // Quantize colors to reduce variations
+          const qr = Math.round(r / 51) * 51;
+          const qg = Math.round(g / 51) * 51;
+          const qb = Math.round(b / 51) * 51;
+          const colorKey = `${qr},${qg},${qb}`;
+          
+          colorMap[colorKey] = (colorMap[colorKey] || 0) + 1;
+        }
+        
+        // Sort by frequency and get top colors
+        const sortedColors = Object.entries(colorMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8)
+          .map(([color]) => {
+            const [r, g, b] = color.split(',').map(Number);
+            return {
+              rgb: `rgb(${r}, ${g}, ${b})`,
+              hex: `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`,
+              name: getColorName(r, g, b)
+            };
+          });
+        
+        resolve(sortedColors);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(imageFile);
+  });
+};
+
+// Function to get a human-readable color name
+const getColorName = (r, g, b) => {
+  const colors = [
+    { name: 'Red', rgb: [255, 0, 0] },
+    { name: 'Pink', rgb: [255, 192, 203] },
+    { name: 'Orange', rgb: [255, 165, 0] },
+    { name: 'Yellow', rgb: [255, 255, 0] },
+    { name: 'Green', rgb: [0, 128, 0] },
+    { name: 'Blue', rgb: [0, 0, 255] },
+    { name: 'Purple', rgb: [128, 0, 128] },
+    { name: 'Brown', rgb: [139, 69, 19] },
+    { name: 'Black', rgb: [0, 0, 0] },
+    { name: 'White', rgb: [255, 255, 255] },
+    { name: 'Gray', rgb: [128, 128, 128] },
+    { name: 'Beige', rgb: [245, 245, 220] },
+    { name: 'Gold', rgb: [255, 215, 0] },
+    { name: 'Silver', rgb: [192, 192, 192] },
+    { name: 'Maroon', rgb: [128, 0, 0] },
+    { name: 'Navy', rgb: [0, 0, 128] },
+    { name: 'Teal', rgb: [0, 128, 128] },
+    { name: 'Olive', rgb: [128, 128, 0] },
+  ];
+  
+  let minDistance = Infinity;
+  let closestColor = 'Unknown';
+  
+  colors.forEach(({ name, rgb: [cr, cg, cb] }) => {
+    const distance = Math.sqrt(
+      Math.pow(r - cr, 2) + Math.pow(g - cg, 2) + Math.pow(b - cb, 2)
+    );
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestColor = name;
+    }
+  });
+  
+  return closestColor;
+};
+
 export default function ProductForm({ initialData, onSubmit, submitLabel = "Save", submitting = false }) {
   const { showToast } = useToast();
   
@@ -18,8 +121,8 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
     oldPrice: '',
     stock: '0',
     fabric: '',
-    colors: '',
-    sizes: '',
+    colors: [],
+    sizes: [],
     isNew: false,
     isFeatured: false,
     isBestseller: false,
@@ -30,6 +133,48 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
       cod: true,
     },
   });
+
+  const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Free Size'];
+  const [extractedColors, setExtractedColors] = useState([]);
+  const [extractingColors, setExtractingColors] = useState(false);
+  
+  // Predefined product types and fabrics
+  const defaultProductTypes = [
+    'Saree',
+    'Kurta',
+    'Shirt',
+    'Pants',
+    'Dress',
+    'Blouse',
+    'Lehenga',
+    'Dupatta',
+    'Churidar',
+    'Salwar',
+    'Kurti'
+  ];
+  
+  const defaultFabrics = [
+    'Silk',
+    'Cotton',
+    'Linen',
+    'Polyester',
+    'Chiffon',
+    'Georgette',
+    'Velvet',
+    'Wool',
+    'Rayon',
+    'Satin',
+    'Crepe',
+    'Net',
+    'Brocade'
+  ];
+
+  const [productTypes, setProductTypes] = useState(defaultProductTypes);
+  const [fabrics, setFabrics] = useState(defaultFabrics);
+  const [showCustomType, setShowCustomType] = useState(false);
+  const [showCustomFabric, setShowCustomFabric] = useState(false);
+  const [customType, setCustomType] = useState('');
+  const [customFabric, setCustomFabric] = useState('');
 
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -42,6 +187,10 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
   useEffect(() => {
     loadCategories();
     if (initialData) {
+      const initialColors = Array.isArray(initialData.colors) 
+        ? initialData.colors 
+        : (initialData.colors ? initialData.colors.split(',').map(c => c.trim()) : []);
+      
       setForm({
         name: initialData.name || '',
         description: initialData.description || '',
@@ -54,8 +203,8 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
         oldPrice: initialData.oldPrice || '',
         stock: initialData.stock || '0',
         fabric: initialData.fabric || '',
-        colors: Array.isArray(initialData.colors) ? initialData.colors.join(', ') : '',
-        sizes: Array.isArray(initialData.sizes) ? initialData.sizes.join(', ') : '',
+        colors: initialColors,
+        sizes: Array.isArray(initialData.sizes) ? initialData.sizes : [],
         isNew: initialData.isNew || false,
         isFeatured: initialData.isFeatured || false,
         isBestseller: initialData.isBestseller || false,
@@ -130,7 +279,7 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
     }));
   };
 
-  const handleMainImageChange = (e) => {
+  const handleMainImageChange = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
@@ -143,6 +292,24 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
       }
       setMainImage(file);
       setMainImagePreview(URL.createObjectURL(file));
+      
+      // Extract colors from the image
+      setExtractingColors(true);
+      try {
+        const colors = await extractColorsFromImage(file);
+        setExtractedColors(colors);
+        // Auto-select all extracted colors
+        setForm(f => ({
+          ...f,
+          colors: colors.map(c => c.name)
+        }));
+        showToast('Colors extracted successfully!', 'success');
+      } catch (error) {
+        console.error('Failed to extract colors:', error);
+        showToast('Failed to extract colors from image', 'error');
+      } finally {
+        setExtractingColors(false);
+      }
     }
   };
 
@@ -176,6 +343,68 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
     setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleSizeToggle = (size) => {
+    setForm(f => ({
+      ...f,
+      sizes: f.sizes.includes(size)
+        ? f.sizes.filter(s => s !== size)
+        : [...f.sizes, size]
+    }));
+  };
+
+  const handleColorToggle = (colorName) => {
+    setForm(f => ({
+      ...f,
+      colors: f.colors.includes(colorName)
+        ? f.colors.filter(c => c !== colorName)
+        : [...f.colors, colorName]
+    }));
+  };
+
+  const handleTypeChange = (e) => {
+    const value = e.target.value;
+    if (value === 'custom') {
+      setShowCustomType(true);
+      setForm(f => ({ ...f, type: '' }));
+    } else {
+      setShowCustomType(false);
+      setForm(f => ({ ...f, type: value }));
+    }
+  };
+
+  const handleAddCustomType = () => {
+    if (customType.trim() && !productTypes.includes(customType.trim())) {
+      const newType = customType.trim();
+      setProductTypes([...productTypes, newType]);
+      setForm(f => ({ ...f, type: newType }));
+      setCustomType('');
+      setShowCustomType(false);
+      showToast(`"${newType}" added to product types`, 'success');
+    }
+  };
+
+  const handleFabricChange = (e) => {
+    const value = e.target.value;
+    if (value === 'custom') {
+      setShowCustomFabric(true);
+      setForm(f => ({ ...f, fabric: '' }));
+    } else {
+      setShowCustomFabric(false);
+      setForm(f => ({ ...f, fabric: value }));
+    }
+  };
+
+  const handleAddCustomFabric = () => {
+    if (customFabric.trim() && !fabrics.includes(customFabric.trim())) {
+      const newFabric = customFabric.trim();
+      setFabrics([...fabrics, newFabric]);
+      setForm(f => ({ ...f, fabric: newFabric }));
+      setCustomFabric('');
+      setShowCustomFabric(false);
+      showToast(`"${newFabric}" added to fabrics`, 'success');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -205,8 +434,8 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
     if (form.oldPrice) formData.append('oldPrice', form.oldPrice);
     formData.append('stock', form.stock);
     if (form.fabric) formData.append('fabric', form.fabric);
-    if (form.colors) formData.append('colors', form.colors);
-    if (form.sizes) formData.append('sizes', form.sizes);
+    if (form.colors.length > 0) formData.append('colors', form.colors.join(', '));
+    if (form.sizes.length > 0) formData.append('sizes', form.sizes.join(', '));
     formData.append('isNew', form.isNew);
     formData.append('isFeatured', form.isFeatured);
     formData.append('isBestseller', form.isBestseller);
@@ -292,22 +521,120 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
       <div className="form-row">
         <div className="admin-form-group">
           <label>Product Type</label>
-          <input
-            type="text"
-            value={form.type}
-            onChange={(e) => setForm(f => ({ ...f, type: e.target.value }))}
-            placeholder="e.g., Saree, Kurta, Shirt"
-          />
+          <select
+            value={showCustomType ? 'custom' : form.type}
+            onChange={handleTypeChange}
+            style={{ marginBottom: showCustomType ? '8px' : '0' }}
+          >
+            <option value="">Select Product Type</option>
+            {productTypes.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+            <option value="custom">➕ Add New Type...</option>
+          </select>
+          
+          {showCustomType && (
+            <div style={{ 
+              display: 'flex', 
+              gap: '8px', 
+              marginTop: '8px',
+              padding: '12px',
+              backgroundColor: '#f9f9f9',
+              border: '1px solid #ddd',
+              borderRadius: '4px'
+            }}>
+              <input
+                type="text"
+                value={customType}
+                onChange={(e) => setCustomType(e.target.value)}
+                placeholder="Enter new product type"
+                style={{ flex: 1, marginBottom: 0 }}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddCustomType()}
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomType}
+                className="admin-btn admin-btn-gold"
+                style={{ padding: '8px 16px', fontSize: '14px' }}
+                disabled={!customType.trim()}
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomType(false);
+                  setCustomType('');
+                }}
+                className="admin-btn admin-btn-outline"
+                style={{ padding: '8px 16px', fontSize: '14px' }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+          <small style={{ color: '#666', display: 'block', marginTop: '6px' }}>
+            Select from list or add a new product type
+          </small>
         </div>
 
         <div className="admin-form-group">
           <label>Fabric</label>
-          <input
-            type="text"
-            value={form.fabric}
-            onChange={(e) => setForm(f => ({ ...f, fabric: e.target.value }))}
-            placeholder="e.g., Silk, Cotton, Linen"
-          />
+          <select
+            value={showCustomFabric ? 'custom' : form.fabric}
+            onChange={handleFabricChange}
+            style={{ marginBottom: showCustomFabric ? '8px' : '0' }}
+          >
+            <option value="">Select Fabric</option>
+            {fabrics.map((fabric) => (
+              <option key={fabric} value={fabric}>{fabric}</option>
+            ))}
+            <option value="custom">➕ Add New Fabric...</option>
+          </select>
+          
+          {showCustomFabric && (
+            <div style={{ 
+              display: 'flex', 
+              gap: '8px', 
+              marginTop: '8px',
+              padding: '12px',
+              backgroundColor: '#f9f9f9',
+              border: '1px solid #ddd',
+              borderRadius: '4px'
+            }}>
+              <input
+                type="text"
+                value={customFabric}
+                onChange={(e) => setCustomFabric(e.target.value)}
+                placeholder="Enter new fabric type"
+                style={{ flex: 1, marginBottom: 0 }}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddCustomFabric()}
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomFabric}
+                className="admin-btn admin-btn-gold"
+                style={{ padding: '8px 16px', fontSize: '14px' }}
+                disabled={!customFabric.trim()}
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomFabric(false);
+                  setCustomFabric('');
+                }}
+                className="admin-btn admin-btn-outline"
+                style={{ padding: '8px 16px', fontSize: '14px' }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+          <small style={{ color: '#666', display: 'block', marginTop: '6px' }}>
+            Select from list or add a new fabric type
+          </small>
         </div>
       </div>
 
@@ -349,23 +676,130 @@ export default function ProductForm({ initialData, onSubmit, submitLabel = "Save
 
       <div className="form-row">
         <div className="admin-form-group">
-          <label>Colors</label>
-          <input
-            type="text"
-            value={form.colors}
-            onChange={(e) => setForm(f => ({ ...f, colors: e.target.value }))}
-            placeholder="e.g., Red, Blue, Green (comma separated)"
-          />
+          <label>Colors (Extracted from Image)</label>
+          {extractingColors ? (
+            <div style={{ 
+              padding: '20px', 
+              textAlign: 'center', 
+              border: '1px solid #ddd', 
+              borderRadius: '4px',
+              backgroundColor: '#f9f9f9'
+            }}>
+              <div style={{ fontSize: '14px', color: '#666' }}>Extracting colors from image...</div>
+            </div>
+          ) : extractedColors.length > 0 ? (
+            <div style={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: '12px', 
+              padding: '12px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              backgroundColor: '#f9f9f9'
+            }}>
+              {extractedColors.map((color, index) => (
+                <label 
+                  key={index}
+                  style={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    border: `2px solid ${form.colors.includes(color.name) ? '#8b7355' : '#ddd'}`,
+                    borderRadius: '8px',
+                    backgroundColor: 'white',
+                    transition: 'all 0.2s ease',
+                    minWidth: '80px'
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={form.colors.includes(color.name)}
+                    onChange={() => handleColorToggle(color.name)}
+                    style={{ display: 'none' }}
+                  />
+                  <div style={{ 
+                    width: '50px', 
+                    height: '50px', 
+                    borderRadius: '50%',
+                    backgroundColor: color.hex,
+                    border: '2px solid #ddd',
+                    marginBottom: '6px',
+                    boxShadow: form.colors.includes(color.name) ? '0 0 0 2px #8b7355' : 'none'
+                  }} />
+                  <span style={{ 
+                    fontSize: '12px', 
+                    fontWeight: form.colors.includes(color.name) ? '600' : '400',
+                    color: form.colors.includes(color.name) ? '#8b7355' : '#333'
+                  }}>
+                    {color.name}
+                  </span>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <div style={{ 
+              padding: '20px', 
+              textAlign: 'center', 
+              border: '1px dashed #ddd', 
+              borderRadius: '4px',
+              backgroundColor: '#f9f9f9',
+              color: '#666'
+            }}>
+              Upload a product image to automatically extract colors
+            </div>
+          )}
+          <small style={{ color: '#666', display: 'block', marginTop: '6px' }}>
+            {extractedColors.length > 0 
+              ? 'Click on colors to select/deselect them for this product'
+              : 'Colors will be automatically detected from the main product image'
+            }
+          </small>
         </div>
 
         <div className="admin-form-group">
           <label>Sizes</label>
-          <input
-            type="text"
-            value={form.sizes}
-            onChange={(e) => setForm(f => ({ ...f, sizes: e.target.value }))}
-            placeholder="e.g., S, M, L, XL (comma separated)"
-          />
+          <div style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '10px', 
+            padding: '12px',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            backgroundColor: '#f9f9f9'
+          }}>
+            {availableSizes.map((size) => (
+              <label 
+                key={size} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  padding: '8px 14px',
+                  border: `2px solid ${form.sizes.includes(size) ? '#8b7355' : '#ddd'}`,
+                  borderRadius: '6px',
+                  backgroundColor: form.sizes.includes(size) ? '#8b7355' : 'white',
+                  color: form.sizes.includes(size) ? 'white' : '#333',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: form.sizes.includes(size) ? '600' : '400',
+                  transition: 'all 0.2s ease',
+                  userSelect: 'none'
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={form.sizes.includes(size)}
+                  onChange={() => handleSizeToggle(size)}
+                  style={{ display: 'none' }}
+                />
+                {size}
+              </label>
+            ))}
+          </div>
+          <small style={{ color: '#666', display: 'block', marginTop: '6px' }}>
+            Click to select/deselect available sizes
+          </small>
         </div>
       </div>
 

@@ -83,6 +83,69 @@ export default function ProductCard({ product }) {
         <span className="product-card-cat">{product.type || product.categoryName}</span>
         <h3>{product.name}</h3>
         <StarRating rating={product.rating || 0} reviews={product.reviewsCount || 0} />
+        
+        {product.colors?.length > 0 && (
+          <div className="product-card-colors" style={{ 
+            display: 'flex', 
+            gap: '6px', 
+            marginTop: '6px',
+            marginBottom: '8px'
+          }}>
+            {product.colors.slice(0, 5).map((color, index) => {
+              const colorMap = {
+                'red': '#DC143C',
+                'pink': '#FF69B4',
+                'orange': '#FF8C00',
+                'yellow': '#FFD700',
+                'green': '#0b6e4f',
+                'blue': '#1e5eff',
+                'purple': '#8B008B',
+                'brown': '#8B4513',
+                'black': '#111111',
+                'white': '#FFFFFF',
+                'gray': '#808080',
+                'grey': '#808080',
+                'beige': '#F5F5DC',
+                'gold': '#d4af37',
+                'silver': '#C0C0C0',
+                'maroon': '#6d001a',
+                'navy': '#000080',
+                'teal': '#008080',
+                'olive': '#808000',
+              };
+              
+              const colorLower = color.toLowerCase().trim();
+              const colorValue = colorMap[colorLower] || '#cccccc';
+              const isLightColor = ['white', 'beige', 'yellow', 'silver'].includes(colorLower);
+              
+              return (
+                <div
+                  key={index}
+                  title={color}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background: colorValue,
+                    border: isLightColor ? '1.5px solid #ddd' : 'none',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                  }}
+                />
+              );
+            })}
+            {product.colors.length > 5 && (
+              <span style={{ 
+                fontSize: '11px', 
+                color: '#666', 
+                alignSelf: 'center',
+                marginLeft: '2px'
+              }}>
+                +{product.colors.length - 5}
+              </span>
+            )}
+          </div>
+        )}
+        
         <div className="product-card-price">
           <span className="price">{formatPrice(product.price)}</span>
           {product.oldPrice && <span className="old-price">{formatPrice(product.oldPrice)}</span>}

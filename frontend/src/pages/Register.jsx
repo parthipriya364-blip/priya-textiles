@@ -122,7 +122,7 @@ export default function Register() {
           </div>
 
           <button className="btn btn-google btn-block" onClick={handleGoogleSignup}>
-            <FaGoogle /> Continue with Google
+            <FaGoogle /> Sign up with Google
           </button>
 
           <p className="auth-switch">

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FaBars, FaBell, FaSearch, FaUserCircle, FaSignOutAlt, FaCheckDouble, FaTrash } from "react-icons/fa";
+import { FaBars, FaSearch, FaUserCircle, FaSignOutAlt, FaMoon, FaSun } from "react-icons/fa";
 import { logout as logoutService, getStoredUser } from "../../services/authService";
 import { useSettings } from "../../context/SettingsContext";
-import { useSocket } from "../../context/SocketContext";
 import logoFallback from "../../assets/logo.png";
 import "../Style/AdminNavbar.css";
 
@@ -11,13 +10,14 @@ export default function AdminNavbar({ onMenuClick }) {
   const navigate = useNavigate();
   const admin = getStoredUser();
   const { settings } = useSettings();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications, connected } = useSocket();
   
-  const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const notifRef = useRef(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('adminDarkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
   const profileRef = useRef(null);
   const searchRef = useRef(null);
 
@@ -47,9 +47,6 @@ export default function AdminNavbar({ onMenuClick }) {
 
   useEffect(() => {
     const onClickOutside = (e) => {
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
-        setNotifOpen(false);
-      }
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileOpen(false);
       }
@@ -60,6 +57,20 @@ export default function AdminNavbar({ onMenuClick }) {
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  useEffect(() => {
+    // Apply dark mode class to body
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    localStorage.setItem('adminDarkMode', JSON.stringify(darkMode));
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   const handleLogout = async () => {
     try {
@@ -72,49 +83,6 @@ export default function AdminNavbar({ onMenuClick }) {
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
       window.location.href = '/login';
-    }
-  };
-
-  const formatTimeAgo = (timestamp) => {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffInSeconds = Math.floor((now - time) / 1000);
-
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hr ago`;
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  };
-
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'order':
-        return '📦';
-      case 'payment':
-        return '💰';
-      case 'order-update':
-        return '📋';
-      case 'stock':
-        return '⚠️';
-      default:
-        return '🔔';
-    }
-  };
-
-  const handleNotificationClick = (notification) => {
-    markAsRead(notification.id);
-    const orderId = notification.data?.orderId;
-    const orderPath = orderId
-      ? `/admin/orders?orderId=${encodeURIComponent(orderId)}`
-      : '/admin/orders';
-
-    // Navigate based on notification type
-    if (notification.type === 'order' || notification.type === 'order-update' || notification.type === 'payment') {
-      navigate(orderPath);
-      setNotifOpen(false);
-    } else if (notification.type === 'stock') {
-      navigate('/admin/products');
-      setNotifOpen(false);
     }
   };
 
@@ -192,68 +160,20 @@ export default function AdminNavbar({ onMenuClick }) {
       </form>
 
       <div className="admin-navbar-right">
-        <div className="navbar-icon-wrap" ref={notifRef}>
+        {/* Dark Mode Toggle */}
+        <div className="navbar-icon-wrap">
           <button
-            className="navbar-icon-btn"
-            onClick={() => setNotifOpen((o) => !o)}
-            aria-label="Notifications"
+            className="navbar-icon-btn theme-toggle"
+            onClick={toggleDarkMode}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            title={darkMode ? "Light Mode" : "Dark Mode"}
           >
-            <FaBell />
-            {unreadCount > 0 && <span className="notif-dot">{unreadCount}</span>}
-            {connected && <span className="connection-indicator" title="Connected"></span>}
+            {darkMode ? (
+              <FaSun style={{ color: '#fbbf24' }} />
+            ) : (
+              <FaMoon style={{ color: '#6b7280' }} />
+            )}
           </button>
-
-          {notifOpen && (
-            <div className="dropdown-panel notif-panel">
-              <div className="dropdown-header">
-                <span>Notifications</span>
-                {notifications.length > 0 && (
-                  <div className="notif-actions">
-                    <button 
-                      className="notif-action-btn" 
-                      onClick={markAllAsRead}
-                      title="Mark all as read"
-                    >
-                      <FaCheckDouble />
-                    </button>
-                    <button 
-                      className="notif-action-btn" 
-                      onClick={clearNotifications}
-                      title="Clear all"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              {notifications.length === 0 ? (
-                <div className="notif-empty">
-                  <FaBell style={{ fontSize: '32px', opacity: 0.3, marginBottom: '8px' }} />
-                  <p>No notifications yet</p>
-                  <span>You'll be notified about new orders and updates</span>
-                </div>
-              ) : (
-                <div className="notif-list">
-                  {notifications.map((n) => (
-                    <div 
-                      className={`notif-item ${n.read ? 'read' : 'unread'}`} 
-                      key={n.id}
-                      onClick={() => handleNotificationClick(n)}
-                    >
-                      <div className="notif-icon">{getNotificationIcon(n.type)}</div>
-                      <div className="notif-content">
-                        <div className="notif-title">{n.title}</div>
-                        <p>{n.message}</p>
-                        <span className="notif-time">{formatTimeAgo(n.time)}</span>
-                      </div>
-                      {!n.read && <div className="notif-unread-dot"></div>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="navbar-icon-wrap" ref={profileRef}>

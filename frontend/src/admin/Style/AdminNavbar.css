@@ -528,3 +528,104 @@
   .admin-navbar-logo span { display: none; }
   .admin-navbar-logo img { width: 30px; height: 30px; }
 }
+
+/* Theme Toggle Button */
+.theme-toggle {
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: rotate(15deg);
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] {
+  --c-white: #1a1a1a;
+  --c-cream: #2a2a2a;
+  --c-border: #3a3a3a;
+  --c-ink: #e5e5e5;
+  --c-gray: #9ca3af;
+  --c-gold-pale: #3a3a2a;
+  --c-maroon-pale: #3a2a2a;
+}
+
+[data-theme="dark"] .admin-navbar {
+  background: #1a1a1a;
+  border-bottom-color: #3a3a3a;
+}
+
+[data-theme="dark"] .admin-search {
+  background: #2a2a2a;
+  border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .admin-search:focus-within {
+  background: #2f2f2f;
+  border-color: #8b7355;
+}
+
+[data-theme="dark"] .navbar-icon-btn {
+  background: #2a2a2a;
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .navbar-icon-btn:hover {
+  border-color: #8b7355;
+  background: #3a3a3a;
+}
+
+[data-theme="dark"] .admin-profile-btn:hover {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .dropdown-panel {
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .search-suggestions {
+  background: #1a1a1a;
+  border-color: #3a3a3a;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .search-suggestion-item:hover,
+[data-theme="dark"] .notif-item:hover,
+[data-theme="dark"] .dropdown-item:hover {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .suggestion-icon,
+[data-theme="dark"] .notif-icon {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .notif-item.unread {
+  background: #2a2220;
+}
+
+[data-theme="dark"] .notif-item.unread:hover {
+  background: #332820;
+}
+
+[data-theme="dark"] .dropdown-item {
+  color: #d4af37;
+}
+
+[data-theme="dark"] .admin-navbar-logo img {
+  background: #2a2a2a;
+  border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .notif-list::-webkit-scrollbar-track {
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .notif-list::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+}
+
+[data-theme="dark"] .notif-list::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}

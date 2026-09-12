@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
-import { FaSearch, FaHeart, FaShoppingBag, FaUser, FaBars, FaUserCircle, FaClipboardList, FaUserEdit } from "react-icons/fa";
+import { FaSearch, FaHeart, FaShoppingBag, FaUser, FaBars, FaUserCircle, FaClipboardList, FaUserEdit, FaMoon, FaSun } from "react-icons/fa";
 import logoFallback from "../assets/logo.png";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -24,21 +24,34 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('userDarkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
   const { totalItems } = useCart();
   const { wishlist } = useWishlist();
   const { settings } = useSettings();
   const navigate = useNavigate();
 
   // Get user from auth service and listen for changes
-  const isLoggedIn = isAuthenticated();
+  const [isLoggedIn, setIsLoggedIn] = useState(isAuthenticated());
 
   // Update user state when component mounts or when login status changes
   useEffect(() => {
-    const updateUser = () => {
+    const updateUser = (event) => {
       const storedUser = getStoredUser();
-      setUser(storedUser);
+      const authStatus = isAuthenticated();
+      
+      // If it's a custom event with user data, use that directly
+      const userData = event?.detail || storedUser;
+      
+      console.log('🔄 Updating user state:', { userData, storedUser, authStatus, eventType: event?.type }); // Debug log
+      
+      setUser(userData);
+      setIsLoggedIn(authStatus);
     };
 
+    // Initial load
     updateUser();
 
     // Listen for storage changes (when user logs in/out in another tab)
@@ -51,13 +64,27 @@ export default function Header() {
       window.removeEventListener('storage', updateUser);
       window.removeEventListener('userChanged', updateUser);
     };
-  }, [isLoggedIn]);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Dark mode effect
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    localStorage.setItem('userDarkMode', JSON.stringify(darkMode));
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -114,6 +141,16 @@ export default function Header() {
           <div className="header-icons">
             <button aria-label="Search" onClick={() => setSearchOpen(true)}>
               <FaSearch />
+            </button>
+
+            {/* Dark Mode Toggle */}
+            <button 
+              className="theme-toggle-btn" 
+              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={toggleDarkMode}
+              title={darkMode ? "Light Mode" : "Dark Mode"}
+            >
+              {darkMode ? <FaSun /> : <FaMoon />}
             </button>
 
             <Link to={isLoggedIn ? "/wishlist" : "/login?redirect=%2Fwishlist"} aria-label="Wishlist" className="icon-link">

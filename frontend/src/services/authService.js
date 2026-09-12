@@ -100,11 +100,16 @@ export const login = async (credentials) => {
       setAuthToken(response.data.token);
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
-      // Dispatch custom event to notify components
-      window.dispatchEvent(new Event('userChanged'));
+      
+      // Dispatch custom event to notify components after storage is set
+      // Use immediate dispatch with CustomEvent to pass data
+      window.dispatchEvent(new CustomEvent('userChanged', { 
+        detail: response.data.user 
+      }));
+      console.log('✅ User login event dispatched:', response.data.user);
     }
     
-    return response.data;
+    return response.data.user; // Return user object directly
   } catch (error) {
     throw error.response?.data || { message: 'Login failed. Please try again.' };
   }

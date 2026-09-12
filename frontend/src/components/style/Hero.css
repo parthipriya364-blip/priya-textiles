@@ -64,9 +64,9 @@
 
 @media (max-width: 768px) {
   .hero {
-    display: none;
     height: calc(100svh - 65px);
     height: calc(100dvh - 65px);
+    min-height: 400px; /* Ensure minimum height on small screens */
     min-height: calc(100svh - 65px);
     min-height: calc(100dvh - 65px);
   }
@@ -75,6 +75,16 @@
   .hero .swiper-button-prev {
     width: 42px;
     height: 42px;
+  }
+  
+  .hero .swiper-button-next::after,
+  .hero .swiper-button-prev::after {
+    font-size: 14px;
+  }
+  
+  .hero .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
   }
 
 }

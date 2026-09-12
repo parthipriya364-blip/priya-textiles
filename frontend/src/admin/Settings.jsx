@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { FaSave, FaSpinner, FaUndo, FaUpload, FaTrash, FaImage } from "react-icons/fa";
+import { FaSave, FaSpinner, FaUndo } from "react-icons/fa";
 import AdminPageHeader from "./components/AdminPageHeader";
-import { getSettings, updateSettings, resetSettings, uploadLogo, deleteLogo } from "../services/settingsService";
+import { getSettings, updateSettings, resetSettings } from "../services/settingsService";
 import "./admin-forms.css";
 
 const initialSettings = {
@@ -32,11 +32,8 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
-  const [logoFile, setLogoFile] = useState(null);
-  const [logoPreview, setLogoPreview] = useState("");
 
   useEffect(() => {
     loadSettings();
@@ -68,7 +65,6 @@ export default function Settings() {
           sunday: "Closed",
         },
       });
-      setLogoPreview(response.settings.logo || "");
       setError("");
     } catch (err) {
       console.error("Failed to load settings:", err);
@@ -145,70 +141,6 @@ export default function Settings() {
       setError(err.message || "Failed to reset settings");
     } finally {
       setResetting(false);
-    }
-  };
-
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please select an image file');
-        return;
-      }
-      
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Image size should be less than 5MB');
-        return;
-      }
-
-      setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
-      setError("");
-    }
-  };
-
-  const handleLogoUpload = async () => {
-    if (!logoFile) {
-      setError("Please select a logo image first");
-      return;
-    }
-
-    try {
-      setUploading(true);
-      setError("");
-      const response = await uploadLogo(logoFile);
-      setLogoPreview(response.logo);
-      setLogoFile(null);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      console.error("Failed to upload logo:", err);
-      setError(err.message || "Failed to upload logo");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleLogoDelete = async () => {
-    if (!confirm("Are you sure you want to delete the logo?")) {
-      return;
-    }
-
-    try {
-      setUploading(true);
-      setError("");
-      await deleteLogo();
-      setLogoPreview("");
-      setLogoFile(null);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      console.error("Failed to delete logo:", err);
-      setError(err.message || "Failed to delete logo");
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -293,96 +225,6 @@ export default function Settings() {
                 rows="4"
                 style={{ resize: 'vertical', fontFamily: 'inherit', padding: '10px', fontSize: '14px' }}
               />
-            </div>
-          </div>
-
-          {/* Logo Upload Section */}
-          <h3 style={{ margin: '30px 0 20px', color: '#111827', fontSize: '18px', fontWeight: 600, borderBottom: '2px solid #e5e7eb', paddingBottom: '10px' }}>
-            Store Logo
-          </h3>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap', marginBottom: '8px' }}>
-            {/* Preview Box */}
-            <div
-              style={{
-                width: 120,
-                height: 120,
-                border: '1.5px dashed #d1d5db',
-                borderRadius: 12,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: '#f9fafb',
-                overflow: 'hidden',
-                flexShrink: 0,
-              }}
-            >
-              {logoPreview ? (
-                <img
-                  src={logoPreview}
-                  alt="Store Logo"
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8 }}
-                />
-              ) : (
-                <div style={{ textAlign: 'center', color: '#9ca3af' }}>
-                  <FaImage style={{ fontSize: 32, marginBottom: 6 }} />
-                  <p style={{ fontSize: 11, fontFamily: 'inherit', margin: 0 }}>No Logo</p>
-                </div>
-              )}
-            </div>
-
-            {/* Upload Controls */}
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <p style={{ fontSize: 12.5, color: '#6b7280', marginBottom: 12, fontFamily: 'inherit' }}>
-                Recommended: square image (PNG/SVG), max 5MB
-              </p>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <label
-                  htmlFor="logo-upload"
-                  className="admin-btn admin-btn-outline"
-                  style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
-                >
-                  <FaUpload />
-                  {logoFile ? logoFile.name.slice(0, 20) + (logoFile.name.length > 20 ? '…' : '') : 'Choose Image'}
-                </label>
-                <input
-                  id="logo-upload"
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handleLogoChange}
-                />
-
-                {logoFile && (
-                  <button
-                    type="button"
-                    className="admin-btn admin-btn-gold"
-                    onClick={handleLogoUpload}
-                    disabled={uploading}
-                  >
-                    {uploading ? <FaSpinner className="spinner" /> : <FaUpload />}
-                    {uploading ? 'Uploading…' : 'Upload Logo'}
-                  </button>
-                )}
-
-                {logoPreview && !logoFile && (
-                  <button
-                    type="button"
-                    className="admin-btn admin-btn-outline"
-                    onClick={handleLogoDelete}
-                    disabled={uploading}
-                    style={{ color: '#dc2626', borderColor: '#dc2626' }}
-                  >
-                    {uploading ? <FaSpinner className="spinner" /> : <FaTrash />}
-                    Remove Logo
-                  </button>
-                )}
-              </div>
-
-              {logoFile && (
-                <p style={{ fontSize: 12, color: '#6b7280', marginTop: 8, fontFamily: 'inherit' }}>
-                  Click <strong>Upload Logo</strong> to save the selected image.
-                </p>
-              )}
             </div>
           </div>
 

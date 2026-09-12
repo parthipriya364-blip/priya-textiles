@@ -67,42 +67,10 @@ export const resetSettings = async () => {
   }
 };
 
-// Upload logo (Admin)
-export const uploadLogo = async (file) => {
-  try {
-    const token = getToken();
-    const formData = new FormData();
-    formData.append('logo', file);
-    
-    const response = await axios.post(`${API_URL}/logo`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: 'Failed to upload logo' };
-  }
-};
-
-// Delete logo (Admin)
-export const deleteLogo = async () => {
-  try {
-    const config = getAxiosConfig();
-    const response = await axios.delete(`${API_URL}/logo`, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || { message: 'Failed to delete logo' };
-  }
-};
-
 export default {
   getSettings,
   getPublicSettings,
   updateSettings,
   updateSettingSection,
   resetSettings,
-  uploadLogo,
-  deleteLogo,
 };
