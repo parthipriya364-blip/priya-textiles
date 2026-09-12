@@ -18,7 +18,7 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  'https://priya-textiles.vercel.app',
+  'www.priyatextiles.com',
   'https://priya-textiles-e6q47ehph-priya-4380.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000'
