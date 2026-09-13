@@ -64,6 +64,7 @@
 
 @media (max-width: 768px) {
   .hero {
+    display: none;
     height: calc(100svh - 65px);
     height: calc(100dvh - 65px);
     min-height: 400px; /* Ensure minimum height on small screens */
