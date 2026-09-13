@@ -6,6 +6,9 @@ const mongoose = require('mongoose');
 const http = require('http');
 const socketIO = require('socket.io');
 const User = require('./models/User');
+const Product = require('./models/Product');
+const Category = require('./models/Category');
+const SubCategory = require('./models/SubCategory');
 
 // Load env vars FIRST before importing passport
 dotenv.config();
@@ -225,6 +228,88 @@ app.get('/api/health', (req, res) => {
     database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
     googleOAuth: process.env.GOOGLE_CLIENT_ID ? 'Configured' : 'Not Configured'
   });
+});
+
+const SEO_SITE_URL = 'https://www.priyatextiles.com';
+
+const escapeXml = (value) => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&apos;');
+
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const [categories, subCategories, products] = await Promise.all([
+      Category.find({ isActive: true }).select('slug updatedAt').lean(),
+      SubCategory.find({ isActive: true }).select('slug categoryName updatedAt').lean(),
+      Product.find({ isActive: true }).select('slug updatedAt').lean(),
+    ]);
+
+    const urls = [
+      { path: '/', priority: '1.0', changefreq: 'daily' },
+      { path: '/sarees', priority: '0.9', changefreq: 'daily' },
+      { path: '/new', priority: '0.9', changefreq: 'daily' },
+      { path: '/about', priority: '0.5', changefreq: 'monthly' },
+      { path: '/contact', priority: '0.5', changefreq: 'monthly' },
+      ...categories.map((category) => ({
+        path: `/${category.slug}`,
+        lastmod: category.updatedAt,
+        priority: '0.8',
+        changefreq: 'daily',
+      })),
+      ...subCategories
+        .filter((subCategory) => subCategory.categoryName?.toLowerCase() === 'women')
+        .map((subCategory) => ({
+          path: `/women/${subCategory.slug}`,
+          lastmod: subCategory.updatedAt,
+          priority: '0.7',
+          changefreq: 'weekly',
+        })),
+      ...products.map((product) => ({
+        path: `/product/${product.slug}`,
+        lastmod: product.updatedAt,
+        priority: '0.7',
+        changefreq: 'weekly',
+      })),
+    ];
+
+    const body = urls.map((url) => [
+      '  <url>',
+      `    <loc>${escapeXml(`${SEO_SITE_URL}${url.path}`)}</loc>`,
+      url.lastmod ? `    <lastmod>${new Date(url.lastmod).toISOString()}</lastmod>` : '',
+      `    <changefreq>${url.changefreq}</changefreq>`,
+      `    <priority>${url.priority}</priority>`,
+      '  </url>',
+    ].filter(Boolean).join('\n')).join('\n');
+
+    res.set('Content-Type', 'application/xml; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>`);
+  } catch (error) {
+    console.error('Sitemap generation error:', error);
+    res.status(500).type('text/plain').send('Unable to generate sitemap');
+  }
+});
+
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain').send([
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /admin',
+    'Disallow: /cart',
+    'Disallow: /checkout',
+    'Disallow: /login',
+    'Disallow: /register',
+    'Disallow: /wishlist',
+    'Disallow: /profile',
+    'Disallow: /orders',
+    'Disallow: /order-details',
+    'Disallow: /order-success',
+    'Disallow: /auth/',
+    `Sitemap: ${SEO_SITE_URL}/sitemap.xml`,
+  ].join('\n'));
 });
 
 app.get('/', (req, res) => {

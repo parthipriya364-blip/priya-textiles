@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { initAuth } from "./services/authService";
 import Layout from "./components/Layout";
@@ -19,6 +19,7 @@ import WomenProducts from "./pages/WomenProducts";
 import Men from "./pages/Men";
 import Kids from "./pages/Kids";
 import Combo from "./pages/Combo";
+import Sarees from "./pages/Sarees";
 import NewArrivalsPage from "./pages/NewArrivalsPage";
 import ProductDetails from "./pages/ProductDetails";
 import Wishlist from "./pages/Wishlist";
@@ -51,6 +52,33 @@ import BannerManager from "./admin/BannerManager";
 import AddBanner from "./admin/AddBanner";
 import EditBanner from "./admin/EditBanner";
 import TestNotifications from "./admin/TestNotifications";
+import Seo from "./components/Seo";
+
+function RouteSeo() {
+  const { pathname } = useLocation();
+  const noindex = [
+    "/cart",
+    "/checkout",
+    "/login",
+    "/register",
+    "/wishlist",
+    "/profile",
+    "/orders",
+    "/order-details",
+    "/order-success",
+    "/admin",
+    "/auth/",
+  ].some((path) => pathname === path || pathname.startsWith(path));
+
+  return (
+    <Seo
+      title="PRIYA TEXTILES | Premium Indian Ethnic Wear"
+      description="Shop sarees, silk sarees, women's fashion, men's shirts, kidswear and new arrivals from PRIYA TEXTILES."
+      path={pathname}
+      noindex={noindex}
+    />
+  );
+}
 
 // Component to conditionally render FloatingContact
 function ConditionalFloatingContact() {
@@ -86,6 +114,7 @@ export default function App() {
                         v7_relativeSplatPath: true,
                       }}
                     >
+                      <RouteSeo />
                       {/* Conditional floating contact bar — only shows on customer pages, not admin */}
                       <ConditionalFloatingContact />
                       <Routes>
@@ -100,7 +129,9 @@ export default function App() {
                           <Route path="/men" element={<Men />} />
                           <Route path="/kids" element={<Kids />} />
                           <Route path="/combo" element={<Combo />} />
+                          <Route path="/sarees" element={<Sarees />} />
                           <Route path="/new" element={<NewArrivalsPage />} />
+                          <Route path="/new-arrivals" element={<Navigate to="/new" replace />} />
                           <Route path="/product/:id" element={<ProductDetails />} />
                           <Route path="/wishlist" element={<Wishlist />} />
                           <Route path="/cart" element={<Cart />} />

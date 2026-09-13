@@ -11,6 +11,7 @@ import QuantitySelector from "../components/QuantitySelector";
 import ProductGrid from "../components/ProductGrid";
 import Loader from "../components/Loader";
 import { formatPrice, discountPercent } from "../utils/formatPrice";
+import Seo, { buildBreadcrumbJsonLd } from "../components/Seo";
 import "./style/ProductDetails.css";
 
 const TABS = ["Description", "Fabric & Care", "Reviews"];
@@ -56,6 +57,10 @@ export default function ProductDetails() {
       setLoading(true);
       const data = await getProduct(id);
       setProduct(data.product);
+
+      if (data.product.slug && id !== data.product.slug) {
+        navigate(`/product/${data.product.slug}`, { replace: true });
+      }
       
       // Set default size
       if (data.product.sizes?.length > 0) {
@@ -154,6 +159,30 @@ export default function ProductDetails() {
     });
   }
 
+  const productPath = `/product/${product.slug || id}`;
+  const categoryPath = `/${product.category?.slug || product.categoryName?.toLowerCase() || "women"}`;
+  const productImage = gallery[0] || product.image?.url;
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.metaDescription || product.description,
+    image: gallery,
+    sku: product._id,
+    brand: { "@type": "Brand", name: "PRIYA TEXTILES" },
+    category: product.categoryName,
+    offers: {
+      "@type": "Offer",
+      url: `https://www.priyatextiles.com${productPath}`,
+      priceCurrency: "INR",
+      price: product.price,
+      availability: product.inStock && product.stock > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
   const handleAddToCart = () => {
     if (product.sizes?.length && !size) {
       setSizeError(true);
@@ -184,6 +213,21 @@ export default function ProductDetails() {
 
   return (
     <div className="page-enter product-details">
+      <Seo
+        title={product.metaTitle || `${product.name} | ${product.categoryName || "Ethnic Wear"}`}
+        description={product.metaDescription || product.description}
+        path={productPath}
+        image={productImage}
+        type="product"
+        jsonLd={[
+          productJsonLd,
+          buildBreadcrumbJsonLd([
+            { name: "PRIYA TEXTILES", path: "/" },
+            { name: product.categoryName || "Collection", path: categoryPath },
+            { name: product.name, path: productPath },
+          ]),
+        ]}
+      />
       <div className="container">
         <nav className="breadcrumb pd-breadcrumb" aria-label="Breadcrumb">
           <Link to="/">Home</Link>
@@ -204,7 +248,7 @@ export default function ProductDetails() {
               {(!product.inStock || product.stock === 0) && (
                 <span className="badge badge-outofstock pd-badge pd-badge-3">Out of Stock</span>
               )}
-              <img src={gallery[activeImage] || product.image?.url} alt={product.name} />
+              <img src={gallery[activeImage] || product.image?.url} alt={`${product.name} - PRIYA TEXTILES`} />
             </div>
             {gallery.length > 1 && (
               <div className="pd-thumbs">
@@ -215,7 +259,7 @@ export default function ProductDetails() {
                     onClick={() => setActiveImage(i)}
                     aria-label={`Show image ${i + 1}`}
                   >
-                    <img src={img} alt="" />
+                    <img src={img} alt={`${product.name} view ${i + 1}`} loading="lazy" />
                   </button>
                 ))}
               </div>

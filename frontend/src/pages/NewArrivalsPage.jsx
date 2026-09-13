@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PageHeader from "../components/PageHeader";
 import ProductGrid from "../components/ProductGrid";
 import { getProducts } from "../services/productService";
+import Seo, { buildBreadcrumbJsonLd } from "../components/Seo";
 
 export default function NewArrivalsPage() {
   const [loading, setLoading] = useState(true);
@@ -26,6 +27,15 @@ export default function NewArrivalsPage() {
 
   return (
     <div className="page-enter">
+      <Seo
+        title="New Arrivals | Latest Ethnic Wear"
+        description="Shop the latest sarees, ethnic wear and seasonal fashion newly added to PRIYA TEXTILES."
+        path="/new"
+        jsonLd={buildBreadcrumbJsonLd([
+          { name: "PRIYA TEXTILES", path: "/" },
+          { name: "New Arrivals", path: "/new" },
+        ])}
+      />
       <PageHeader
         eyebrow="Just Woven"
         title="New Arrivals"

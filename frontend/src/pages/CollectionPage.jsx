@@ -4,6 +4,7 @@ import PageHeader from "../components/PageHeader";
 import ProductGrid from "../components/ProductGrid";
 import { getProducts } from "../services/productService";
 import { getCategories } from "../services/categoryService";
+import Seo, { buildBreadcrumbJsonLd } from "../components/Seo";
 import "./style/CollectionPage.css";
 
 const SORTS = {
@@ -14,7 +15,33 @@ const SORTS = {
   newest: (a, b) => Number(b.isNew) - Number(a.isNew),
 };
 
-export default function CollectionPage({ category, belowHeader }) {
+const CATEGORY_SEO = {
+  women: {
+    title: "Women's Collection | Sarees & Ethnic Wear",
+    description: "Shop women's sarees, silk sarees, kurtis, lehengas and elegant ethnic wear at PRIYA TEXTILES.",
+  },
+  men: {
+    title: "Men's Collection | Shirts & Ethnic Wear",
+    description: "Explore men's shirts, kurtas and comfortable ethnic wear from PRIYA TEXTILES.",
+  },
+  kids: {
+    title: "Kids Collection | Traditional & Festive Wear",
+    description: "Find comfortable, festive and traditional kidswear for celebrations and everyday moments at PRIYA TEXTILES.",
+  },
+  combo: {
+    title: "Family Combo Collection | PRIYA TEXTILES",
+    description: "Discover coordinated family clothing combos and festive styles from PRIYA TEXTILES.",
+  },
+};
+
+export default function CollectionPage({
+  category,
+  belowHeader,
+  publicPath = category,
+  titleOverride,
+  descriptionOverride,
+  productQuery,
+}) {
   const [categoryData, setCategoryData] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,14 +51,14 @@ export default function CollectionPage({ category, belowHeader }) {
 
   useEffect(() => {
     loadData();
-  }, [category]);
+  }, [category, productQuery]);
 
   const loadData = async () => {
     setLoading(true);
     try {
       const [categoriesData, productsData] = await Promise.all([
         getCategories(),
-        getProducts({ category })
+        getProducts({ category, ...(productQuery || {}) })
       ]);
       
       const foundCategory = categoriesData.categories?.find(c => c.slug === category);
@@ -67,6 +94,13 @@ export default function CollectionPage({ category, belowHeader }) {
       .sort(SORTS[sort]);
   }, [products, type, maxPrice, sort]);
 
+  const seo = CATEGORY_SEO[category] || {
+    title: `${categoryData?.name || category} Collection`,
+    description: categoryData?.description || `Explore the ${category} collection at PRIYA TEXTILES.`,
+  };
+  const seoTitle = titleOverride || seo.title;
+  const seoDescription = descriptionOverride || seo.description;
+
   if (!categoryData) {
     return (
       <div className="page-enter" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -77,10 +111,19 @@ export default function CollectionPage({ category, belowHeader }) {
 
   return (
     <div className="page-enter">
+      <Seo
+        title={seoTitle}
+        description={seoDescription}
+        path={`/${publicPath}`}
+        jsonLd={buildBreadcrumbJsonLd([
+          { name: "PRIYA TEXTILES", path: "/" },
+          { name: titleOverride || categoryData.name, path: `/${publicPath}` },
+        ])}
+      />
       <PageHeader
         eyebrow="Collection"
-        title={`${categoryData.name}'s Collection`}
-        subtitle={categoryData.description || `Explore our ${categoryData.name.toLowerCase()} collection`}
+        title={titleOverride || `${categoryData.name}'s Collection`}
+        subtitle={seoDescription}
         crumbs={[{ label: `${categoryData.name}'s Collection` }]}
       />
 

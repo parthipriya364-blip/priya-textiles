@@ -12,6 +12,14 @@
       "destination": "https://priya-textiles.onrender.com/socket.io/:path*"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "https://priya-textiles.onrender.com/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "https://priya-textiles.onrender.com/robots.txt"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -5,6 +5,7 @@ import ProductGrid from "../components/ProductGrid";
 import WomenSubCategorySlider from "../components/WomenSubCategorySlider";
 import { useSubCategories } from "../context/SubCategoryContext";
 import { getProducts } from "../services/productService";
+import Seo, { buildBreadcrumbJsonLd } from "../components/Seo";
 
 const slugify = (name) =>
   name
@@ -68,6 +69,16 @@ export default function WomenProducts() {
 
   return (
     <div className="page-enter">
+      <Seo
+        title={`${subCategory.name} | Women's Collection`}
+        description={subCategory.description || `Shop ${subCategory.name.toLowerCase()} from the PRIYA TEXTILES women's collection.`}
+        path={`/women/${subCategorySlug}`}
+        jsonLd={buildBreadcrumbJsonLd([
+          { name: "PRIYA TEXTILES", path: "/" },
+          { name: "Women's Collection", path: "/women" },
+          { name: subCategory.name, path: `/women/${subCategorySlug}` },
+        ])}
+      />
       <PageHeader
         eyebrow="Women"
         title={subCategory.name}
