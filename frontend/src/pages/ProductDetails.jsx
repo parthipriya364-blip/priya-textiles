@@ -16,6 +16,7 @@ import "./style/ProductDetails.css";
 
 const TABS = ["Description", "Fabric & Care", "Reviews"];
 const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+const productSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -47,7 +48,7 @@ export default function ProductDetails() {
   }, [product, tab]);
 
   const loadProduct = async () => {
-    if (!objectIdPattern.test(id)) {
+    if (!objectIdPattern.test(id) && !productSlugPattern.test(id)) {
       setProduct(null);
       setLoading(false);
       return;
