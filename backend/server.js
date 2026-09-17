@@ -5,6 +5,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const http = require('http');
 const socketIO = require('socket.io');
+const compression = require('compression');
 const User = require('./models/User');
 
 // Load env vars FIRST before importing passport
@@ -12,6 +13,9 @@ dotenv.config();
 
 // Now import passport after env vars are loaded
 const passport = require('./config/passport');
+
+// Import scalability middlewares
+const { apiLimiter } = require('./middleware/globalRateLimiter');
 
 const app = express();
 const server = http.createServer(app);
@@ -113,12 +117,17 @@ const connectDB = async () => {
     console.log('📍 URI:', process.env.MONGO_URI?.replace(/:[^:]*@/, ':****@')); // Hide password
     
     const conn = await mongoose.connect(process.env.MONGO_URI, {
+      // Connection pooling for better performance
+      maxPoolSize: 50, // Maximum number of connections in the pool
+      minPoolSize: 10, // Minimum number of connections
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
       serverSelectionTimeoutMS: 10000, // Timeout after 10s instead of 30s
-      socketTimeoutMS: 45000,
+      family: 4, // Use IPv4, skip trying IPv6
     });
     
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
     console.log(`📚 Database: ${conn.connection.name}`);
+    console.log(`🔗 Connection Pool: ${conn.connection.maxPoolSize || 50} max connections`);
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
     process.exit(1);
@@ -162,7 +171,7 @@ const ensureDefaultAdmin = async () => {
   }
 
   await User.create({
-    name: 'Administrator',
+    name: 'Priya',
     email,
     password,
     role: 'admin'
@@ -171,8 +180,22 @@ const ensureDefaultAdmin = async () => {
 };
 
 // Body parser middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true}));
+app.use(express.json({ limit: '10mb' })); // Limit request size
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Enable response compression for better performance
+app.use(compression({
+  level: 6, // Compression level (0-9)
+  threshold: 1024, // Only compress if response > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
+console.log('✅ Response compression enabled');
 
 // Session middleware (required for Passport)
 app.use(
@@ -204,6 +227,10 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Apply global rate limiting to all API routes
+app.use('/api', apiLimiter);
+console.log('✅ Global rate limiting enabled (100 requests per 15 minutes)');
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));

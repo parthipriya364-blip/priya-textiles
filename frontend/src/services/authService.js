@@ -224,3 +224,84 @@ export default {
   getStoredUser,
   initAuth
 };
+
+
+// ============================================
+// FORGOT PASSWORD FLOW
+// ============================================
+
+/**
+ * Request password reset - Send OTP to email
+ * @param {string} email - User email address
+ * @returns {Promise<Object>}
+ */
+export const forgotPassword = async (email) => {
+  try {
+    const response = await axios.post(`${API_URL}/forgot-password`, { email });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to send OTP. Please try again.' };
+  }
+};
+
+/**
+ * Verify OTP for password reset
+ * @param {string} email - User email address
+ * @param {string} otp - 6-digit OTP code
+ * @returns {Promise<Object>}
+ */
+export const verifyOTP = async (email, otp) => {
+  try {
+    const response = await axios.post(`${API_URL}/verify-otp`, { email, otp });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to verify OTP. Please try again.' };
+  }
+};
+
+/**
+ * Reset password with verified token
+ * @param {string} email - User email address
+ * @param {string} resetToken - Reset token from OTP verification
+ * @param {string} newPassword - New password
+ * @returns {Promise<Object>}
+ */
+export const resetPassword = async (email, resetToken, newPassword) => {
+  try {
+    const response = await axios.post(`${API_URL}/reset-password`, {
+      email,
+      resetToken,
+      newPassword
+    });
+    
+    // If reset is successful and token is provided, set auth
+    if (response.data.success && response.data.token) {
+      setAuthToken(response.data.token);
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(response.data.user));
+      
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new CustomEvent('userChanged', { 
+        detail: response.data.user 
+      }));
+    }
+    
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to reset password. Please try again.' };
+  }
+};
+
+/**
+ * Resend OTP for password reset
+ * @param {string} email - User email address
+ * @returns {Promise<Object>}
+ */
+export const resendOTP = async (email) => {
+  try {
+    const response = await axios.post(`${API_URL}/resend-otp`, { email });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to resend OTP. Please try again.' };
+  }
+};

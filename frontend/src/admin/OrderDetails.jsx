@@ -105,17 +105,54 @@ export default function OrderDetails() {
 
       <div className="order-details-grid">
         <section className="order-details-card order-details-status-card">
-          <div>
-            <span className="order-details-label">Order status</span>
-            <strong>{statusLabel(order.orderStatus)}</strong>
+          <h2>Order Status</h2>
+          
+          {/* Status Progress Boxes */}
+          <div className="status-boxes-container">
+            <div className={`status-box ${order.orderStatus === 'confirmed' || order.orderStatus === 'shipped' || order.orderStatus === 'out-for-delivery' || order.orderStatus === 'delivered' ? 'active' : ''} ${order.orderStatus === 'confirmed' ? 'current' : ''}`}>
+              <div className="status-icon">📦</div>
+              <div className="status-label">Confirmed</div>
+            </div>
+            
+            <div className="status-connector"></div>
+            
+            <div className={`status-box ${order.orderStatus === 'shipped' || order.orderStatus === 'out-for-delivery' || order.orderStatus === 'delivered' ? 'active' : ''} ${order.orderStatus === 'shipped' ? 'current' : ''}`}>
+              <div className="status-icon">🚚</div>
+              <div className="status-label">Shipped</div>
+            </div>
+            
+            <div className="status-connector"></div>
+            
+            <div className={`status-box ${order.orderStatus === 'out-for-delivery' || order.orderStatus === 'delivered' ? 'active' : ''} ${order.orderStatus === 'out-for-delivery' ? 'current' : ''}`}>
+              <div className="status-icon">🚗</div>
+              <div className="status-label">Out for Delivery</div>
+            </div>
+            
+            <div className="status-connector"></div>
+            
+            <div className={`status-box ${order.orderStatus === 'delivered' ? 'active' : ''} ${order.orderStatus === 'delivered' ? 'current' : ''}`}>
+              <div className="status-icon">✅</div>
+              <div className="status-label">Delivered</div>
+            </div>
           </div>
-          <label>
-            <span className="order-details-label">Update status</span>
-            <select value={order.orderStatus} onChange={changeStatus} disabled={updating}>
-              {STATUS_OPTIONS.map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}
-            </select>
-          </label>
-          {updating && <FaSpinner className="spinner" aria-label="Updating status" />}
+          
+          {order.orderStatus === 'cancelled' && (
+            <div className="status-cancelled-banner">
+              <span className="status-icon">❌</span>
+              <span>Order Cancelled</span>
+            </div>
+          )}
+          
+          {/* Status Update Dropdown */}
+          <div className="status-update-section">
+            <label>
+              <span className="order-details-label">Update Status</span>
+              <select value={order.orderStatus} onChange={changeStatus} disabled={updating}>
+                {STATUS_OPTIONS.map((status) => <option key={status} value={status}>{statusLabel(status)}</option>)}
+              </select>
+            </label>
+            {updating && <FaSpinner className="spinner" aria-label="Updating status" />}
+          </div>
         </section>
 
         <section className="order-details-card">

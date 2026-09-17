@@ -182,13 +182,13 @@ export default function AdminNavbar({ onMenuClick }) {
             onClick={() => setProfileOpen((o) => !o)}
           >
             <FaUserCircle className="profile-avatar" />
-            <span className="profile-name">{admin?.name || "Admin"}</span>
+            <span className="profile-name">{admin?.name || "Priya"}</span>
           </button>
 
           {profileOpen && (
             <div className="dropdown-panel profile-panel">
               <div className="dropdown-header">
-                <strong>{admin?.name || "Admin"}</strong>
+                <strong>{admin?.name || "Priya"}</strong>
                 <span>{admin?.email || "admin@priyatextiles.com"}</span>
               </div>
               <button className="dropdown-item" onClick={handleLogout}>

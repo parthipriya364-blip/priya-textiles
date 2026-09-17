@@ -112,6 +112,10 @@ export default function Login({ adminOnly = false }) {
               {errors.password && <span className="field-error">{errors.password}</span>}
             </div>
 
+            <div className="forgot-password-link">
+              <Link to="/forgot-password">Forgot Password?</Link>
+            </div>
+
             <button type="submit" className="btn btn-primary btn-block auth-submit" disabled={loading}>
               <FaSignInAlt /> {loading ? "Signing In…" : "Login"}
             </button>

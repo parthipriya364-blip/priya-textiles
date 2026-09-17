@@ -192,3 +192,395 @@
 [data-theme="dark"] .auth-guest {
   color: #9ca3af;
 }
+
+
+/* OTP Input Styles */
+.otp-input-container {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.otp-input {
+  width: 50px;
+  height: 56px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s;
+  outline: none;
+  background: white;
+  color: #111827;
+}
+
+.otp-input:focus {
+  border-color: #8B0000;
+  box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+}
+
+.otp-input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Resend Section */
+.resend-section {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.resend-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #8B0000;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.resend-button:hover:not(:disabled) {
+  background: rgba(139, 0, 0, 0.05);
+}
+
+.resend-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resend-timer {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.resend-timer strong {
+  color: #8B0000;
+  font-weight: 600;
+}
+
+.spinner.small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .otp-input-container {
+    gap: 8px;
+  }
+
+  .otp-input {
+    width: 42px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .otp-input-container {
+    gap: 6px;
+  }
+
+  .otp-input {
+    width: 38px;
+    height: 44px;
+    font-size: 18px;
+  }
+}
+
+
+/* Password Strength Indicator */
+.password-strength {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Input Error Message */
+.input-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-error::before {
+  content: '⚠';
+  font-size: 14px;
+}
+
+/* Help Box List Styles */
+.help-box ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.help-box li {
+  margin-bottom: 4px;
+}
+
+/* Enhanced Button States */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #9ca3af;
+}
+
+.btn-primary:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+}
+
+
+/* Forgot Password Link */
+.forgot-password-link {
+  text-align: right;
+  margin: -8px 0 20px;
+}
+
+.forgot-password-link a {
+  color: #8B0000;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.forgot-password-link a:hover {
+  color: #660000;
+  text-decoration: underline;
+}
+
+
+/* Priya Textiles Branding Header */
+.auth-brand-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #8B0000 0%, #660000 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(139, 0, 0, 0.2);
+  animation: slideDown 0.6s ease-out;
+}
+
+.brand-name {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 8px;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.brand-tagline {
+  font-size: 14px;
+  color: #ffd4d4;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* Slide Down Animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhance auth-card appearance with branding */
+.auth-brand-header + .auth-card {
+  animation: fadeInUp 0.7s ease-out 0.2s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Responsive for Branding */
+@media (max-width: 768px) {
+  .auth-brand-header {
+    margin-bottom: 25px;
+    padding: 16px;
+  }
+
+  .brand-name {
+    font-size: 26px;
+  }
+
+  .brand-tagline {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-brand-header {
+    margin-bottom: 20px;
+    padding: 14px;
+  }
+
+  .brand-name {
+    font-size: 24px;
+  }
+
+  .brand-tagline {
+    font-size: 12px;
+  }
+}
+
+
+/* Priya Textiles Branding Inside Card */
+.auth-card-brand {
+  text-align: center;
+  padding: 25px 20px;
+  background: linear-gradient(135deg, #8B0000 0%, #660000 100%);
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 30px -20px;
+  position: relative;
+  overflow: hidden;
+  animation: slideDownBrand 0.7s ease-out;
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.15);
+}
+
+.auth-card-brand::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
+}
+
+.auth-card-brand .brand-name {
+  font-size: 30px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px;
+  letter-spacing: 1.5px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 1;
+}
+
+.auth-card-brand .brand-tagline {
+  font-size: 13px;
+  color: #ffd4d4;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes slideDownBrand {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Adjust auth-card padding for brand */
+.auth-card:has(.auth-card-brand) {
+  padding-top: 20px;
+}
+
+/* Mobile Responsive for Card Brand */
+@media (max-width: 768px) {
+  .auth-card-brand {
+    padding: 20px 16px;
+    margin: -16px -16px 25px -16px;
+  }
+
+  .auth-card-brand .brand-name {
+    font-size: 26px;
+  }
+
+  .auth-card-brand .brand-tagline {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card-brand {
+    padding: 18px 14px;
+    margin: -14px -14px 20px -14px;
+  }
+
+  .auth-card-brand .brand-name {
+    font-size: 23px;
+    letter-spacing: 1px;
+  }
+
+  .auth-card-brand .brand-tagline {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+}

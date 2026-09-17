@@ -37,11 +37,14 @@ export default function Customers() {
 
   const filtered = useMemo(() => {
     if (!query) return customers;
+    const lowerQuery = query.toLowerCase();
     return customers.filter(
       (c) =>
-        c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.email.toLowerCase().includes(query.toLowerCase()) ||
-        (c.address?.city || "").toLowerCase().includes(query.toLowerCase())
+        c.name.toLowerCase().includes(lowerQuery) ||
+        c.email.toLowerCase().includes(lowerQuery) ||
+        (c.phone || "").includes(query) || // Phone can be searched by number
+        (c.address?.city || "").toLowerCase().includes(lowerQuery) ||
+        (c.address?.state || "").toLowerCase().includes(lowerQuery)
     );
   }, [customers, query]);
 
@@ -49,6 +52,7 @@ export default function Customers() {
   const totalStats = useMemo(() => {
     const totalOrders = customers.reduce((sum, c) => sum + (c.orderCount || 0), 0);
     const totalRevenue = customers.reduce((sum, c) => sum + (c.totalPurchase || 0), 0);
+    const activeCustomers = customers.filter(c => (c.orderCount || 0) > 0).length;
     const avgOrderValue = totalRevenue / Math.max(totalOrders, 1);
     
     // Calculate percentage change (comparing avg order value to median customer purchase)
@@ -70,6 +74,7 @@ export default function Customers() {
       totalRevenue,
       avgOrderValue,
       avgOrderValueChange,
+      activeCustomers,
     };
   }, [customers]);
 
@@ -77,7 +82,7 @@ export default function Customers() {
     <div>
       <AdminPageHeader 
         title="Customers" 
-        subtitle={`${customers.length} registered customers · ${totalStats.totalOrders} total orders · ₹${totalStats.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })} total revenue`} 
+        subtitle={`${customers.length} registered · ${totalStats.activeCustomers} active · ${totalStats.totalOrders} orders · ₹${totalStats.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })} revenue`} 
       />
 
       {/* Customer Statistics */}
@@ -85,10 +90,18 @@ export default function Customers() {
         <div className="stat-card">
           <div className="stat-label">Total Customers</div>
           <div className="stat-value">{customers.length}</div>
+          <div className="stat-sublabel">
+            {totalStats.activeCustomers} active customers
+          </div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Total Orders</div>
           <div className="stat-value">{totalStats.totalOrders}</div>
+          <div className="stat-sublabel">
+            {totalStats.activeCustomers > 0 
+              ? `${(totalStats.totalOrders / totalStats.activeCustomers).toFixed(1)} avg per customer` 
+              : '0 avg per customer'}
+          </div>
         </div>
         <div className="stat-card">
           <div className="stat-label">Total Revenue</div>
@@ -118,18 +131,57 @@ export default function Customers() {
         columns={[
           { key: "name", label: "Customer" },
           { key: "email", label: "Email" },
-          { key: "phone", label: "Phone" },
+          { key: "phone", label: "Phone", render: (c) => c.phone || "-" },
           { key: "city", label: "City", render: (c) => c.address?.city || "-" },
+          { 
+            key: "lastLogin", 
+            label: "Last Login", 
+            render: (c) => c.lastLogin 
+              ? new Date(c.lastLogin).toLocaleDateString('en-IN', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : "Never"
+          },
           { 
             key: "orderCount", 
             label: "Orders", 
-            render: (c) => c.orderCount || 0 
+            render: (c) => (
+              <span style={{ 
+                fontWeight: 'bold', 
+                color: c.orderCount > 0 ? '#2ecc71' : '#95a5a6' 
+              }}>
+                {c.orderCount || 0}
+              </span>
+            )
           },
           {
             key: "totalPurchase",
             label: "Total Purchase",
-            render: (c) => `₹${(c.totalPurchase || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            render: (c) => (
+              <span style={{ 
+                fontWeight: 'bold',
+                color: (c.totalPurchase || 0) > 0 ? '#27ae60' : '#95a5a6'
+              }}>
+                ₹{(c.totalPurchase || 0).toLocaleString('en-IN', { 
+                  minimumFractionDigits: 2, 
+                  maximumFractionDigits: 2 
+                })}
+              </span>
+            ),
           },
+          {
+            key: "createdAt",
+            label: "Registered",
+            render: (c) => new Date(c.createdAt).toLocaleDateString('en-IN', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            })
+          }
         ]}
         rows={filtered}
         loading={loading}
