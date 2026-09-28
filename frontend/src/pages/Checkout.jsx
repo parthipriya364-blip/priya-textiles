@@ -30,7 +30,6 @@ export default function Checkout() {
   // Shipping configuration from admin settings
   const [shippingConfig, setShippingConfig] = useState({
     shippingCharge: 149,
-    freeShippingThreshold: 2999,
   });
   
   const [customerData, setCustomerData] = useState({
@@ -45,7 +44,7 @@ export default function Checkout() {
 
   // Calculate totals using admin-configured shipping
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = subtotal >= shippingConfig.freeShippingThreshold ? 0 : shippingConfig.shippingCharge;
+  const shipping = shippingConfig.shippingCharge;
   const total = subtotal + shipping;
 
   useEffect(() => {
@@ -56,7 +55,6 @@ export default function Checkout() {
         if (response.success && response.settings) {
           setShippingConfig({
             shippingCharge: response.settings.shippingCharge || 149,
-            freeShippingThreshold: response.settings.freeShippingThreshold || 2999,
           });
         }
       } catch (error) {
@@ -613,12 +611,6 @@ export default function Checkout() {
                   <span>₹{total.toFixed(2)}</span>
                 </div>
               </div>
-
-              {subtotal < shippingConfig.freeShippingThreshold && (
-                <div className="shipping-note">
-                  <p>Add ₹{(shippingConfig.freeShippingThreshold - subtotal).toFixed(2)} more for FREE shipping!</p>
-                </div>
-              )}
             </div>
           </div>
         </div>

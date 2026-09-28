@@ -75,11 +75,6 @@ const settingsSchema = new mongoose.Schema({
     min: 0,
     default: 0,
   },
-  freeShippingThreshold: {
-    type: Number,
-    min: 0,
-    default: 0,
-  },
   
   // Email Configuration
   supportEmail: {

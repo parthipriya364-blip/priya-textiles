@@ -416,7 +416,7 @@ export default function ProductDetails() {
             <div className="pd-perks">
               <span>
                 <FaTruck />
-                Free Shipping on orders above ₹2,999
+                Free Shipping Available
               </span>
               <span>
                 <FaUndoAlt />

@@ -26,7 +26,6 @@ export default function Cart() {
   // Shipping configuration from admin settings
   const [shippingConfig, setShippingConfig] = useState({
     shippingCharge: 149,
-    freeShippingThreshold: 2999,
   });
 
   useEffect(() => {
@@ -37,7 +36,6 @@ export default function Cart() {
         if (response.success && response.settings) {
           setShippingConfig({
             shippingCharge: response.settings.shippingCharge || 149,
-            freeShippingThreshold: response.settings.freeShippingThreshold || 2999,
           });
         }
       } catch (error) {
@@ -51,7 +49,7 @@ export default function Cart() {
 
   if (!user) return null;
 
-  const shipping = subtotal >= shippingConfig.freeShippingThreshold || subtotal === 0 ? 0 : shippingConfig.shippingCharge;
+  const shipping = subtotal === 0 ? 0 : shippingConfig.shippingCharge;
   const total = subtotal + shipping;
 
   return (

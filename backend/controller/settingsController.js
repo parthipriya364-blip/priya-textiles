@@ -82,7 +82,6 @@ exports.getPublicSettings = async (req, res) => {
       businessHours: settings.businessHours,
       currency: settings.currency,
       shippingCharge: settings.shippingCharge,
-      freeShippingThreshold: settings.freeShippingThreshold,
       metaTitle: settings.metaTitle,
       metaDescription: settings.metaDescription,
       returnPolicy: settings.returnPolicy,
@@ -184,7 +183,6 @@ exports.updateSettingSection = async (req, res) => {
         break;
       case 'shipping':
         if (updates.shippingCharge !== undefined) settings.shippingCharge = updates.shippingCharge;
-        if (updates.freeShippingThreshold !== undefined) settings.freeShippingThreshold = updates.freeShippingThreshold;
         break;
       case 'notifications':
         if (updates.emailNotifications) settings.emailNotifications = updates.emailNotifications;

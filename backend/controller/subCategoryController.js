@@ -19,10 +19,22 @@ exports.getSubCategories = async (req, res) => {
       .populate('category', 'name slug')
       .sort({ displayOrder: 1, name: 1 });
 
+    // Add product count for each subcategory
+    const Product = require('../models/Product');
+    const subcategoriesWithCount = await Promise.all(
+      subcategories.map(async (subcat) => {
+        const productsCount = await Product.countDocuments({ subCategory: subcat._id });
+        return {
+          ...subcat.toObject(),
+          productsCount,
+        };
+      })
+    );
+
     res.status(200).json({
       success: true,
-      count: subcategories.length,
-      subcategories,
+      count: subcategoriesWithCount.length,
+      subcategories: subcategoriesWithCount,
     });
   } catch (error) {
     console.error('Get subcategories error:', error);

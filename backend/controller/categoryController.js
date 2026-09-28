@@ -8,10 +8,36 @@ exports.getCategories = async (req, res) => {
   try {
     const categories = await Category.find().sort({ order: 1, name: 1 });
 
+    // Add product count and subcategory count for each category
+    const Product = require('../models/Product');
+    const SubCategory = require('../models/SubCategory');
+    
+    const categoriesWithCounts = await Promise.all(
+      categories.map(async (cat) => {
+        // Count products in this category
+        const productsCount = await Product.countDocuments({ category: cat._id });
+        
+        // Count subcategories for Women category
+        let subCategoriesCount = 0;
+        if (cat.name === 'Women') {
+          subCategoriesCount = await SubCategory.countDocuments({ 
+            categoryName: 'Women',
+            isActive: true 
+          });
+        }
+        
+        return {
+          ...cat.toObject(),
+          productsCount,
+          subCategoriesCount,
+        };
+      })
+    );
+
     res.status(200).json({
       success: true,
-      count: categories.length,
-      categories,
+      count: categoriesWithCounts.length,
+      categories: categoriesWithCounts,
     });
   } catch (error) {
     console.error('Get categories error:', error);
