@@ -99,8 +99,9 @@ export default function Footer() {
         {/* Contact */}
         <div className="footer-col footer-contact">
           <h4>Visit the Atelier</h4>
-          <p><FaMapMarkerAlt /> {settings.address}</p>
-          <p><FaPhoneAlt /> {settings.phone}</p>
+          <p><FaMapMarkerAlt /> Priya Textiles KVP Theatre Road Opposite Srinivasa Store KVP Suresh Complex Shop No. 4 Elampillai, Salem District Tamil Nadu  637502, India.</p>
+          <p><FaPhoneAlt />8220779146,<br />
+                               8807329146</p>
           <p><FaEnvelope /> {settings.storeEmail}</p>
           <p><FaClock /> {getBusinessHours()}</p>
         </div>

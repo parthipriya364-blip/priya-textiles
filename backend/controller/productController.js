@@ -78,14 +78,11 @@ exports.getProducts = async (req, res) => {
 // @access  Public
 exports.getProduct = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid product ID format',
-      });
-    }
+    const lookup = mongoose.Types.ObjectId.isValid(req.params.id)
+      ? { _id: req.params.id }
+      : { slug: req.params.id.toLowerCase() };
 
-    const product = await Product.findById(req.params.id)
+    const product = await Product.findOne(lookup)
       .populate('category', 'name slug image')
       .populate('subCategory', 'name slug image');
 

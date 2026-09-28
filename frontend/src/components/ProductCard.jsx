@@ -14,6 +14,7 @@ export default function ProductCard({ product }) {
   const navigate = useNavigate();
   
   const productId = product._id || product.id;
+  const productPath = product.slug ? `/product/${product.slug}` : `/product/${productId}`;
   const wishlisted = isWishlisted(productId);
   const discount = discountPercent(product.price, product.oldPrice);
   const productImage = product.image?.url || product.image;
@@ -42,13 +43,13 @@ export default function ProductCard({ product }) {
 
   const handleQuickView = (e) => {
     e.preventDefault();
-    navigate(`/product/${productId}`);
+    navigate(productPath);
   };
 
   return (
-    <Link to={`/product/${productId}`} className="product-card">
+    <Link to={productPath} className="product-card">
       <div className="product-card-media">
-        <img src={productImage} alt={product.name} />
+        <img src={productImage} alt={`${product.name} - PRIYA TEXTILES`} loading="lazy" />
         <div className="product-card-badges">
           {product.isNew && <span className="badge badge-new">New</span>}
           {product.isFeatured && <span className="badge badge-featured">Featured</span>}

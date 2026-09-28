@@ -96,7 +96,7 @@ export default function Categories() {
               key={cat._id} 
               className={`category-card card-${i + 1}`}
             >
-              <img src={cat.image?.url} alt={cat.name} />
+              <img src={cat.image?.url} alt={`${cat.name} collection at PRIYA TEXTILES`} loading="lazy" />
               <div className="category-card-overlay">
                 <span className="collection-tag">Premium Collection</span>
                 <h3>{cat.name}'s Collection</h3>

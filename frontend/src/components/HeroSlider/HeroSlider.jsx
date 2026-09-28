@@ -67,7 +67,7 @@ export default function HeroSlider({ className = "" }) {
         <Fragment key={slide._id || slide.id}>
           <img
           src={slide.image?.url || slide.image}
-          alt="Priya Textiles banner"
+          alt={`${slide.title || "PRIYA TEXTILES collection"} banner`}
           className={`hero-slide ${i === index ? "active" : ""}`}
           loading={i === 0 ? "eager" : "lazy"}
           fetchpriority={i === 0 ? "high" : "auto"}
