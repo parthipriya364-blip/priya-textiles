@@ -105,7 +105,6 @@ export default function App() {
 
   return (
     <AuthProvider>
-<<<<<<< HEAD
       <LoadingProvider>
         <ToastProvider>
           <SettingsProvider>
@@ -120,28 +119,10 @@ export default function App() {
                           v7_relativeSplatPath: true,
                         }}
                       >
+                        <RouteSeo />
                         {/* Conditional floating contact bar — only shows on customer pages, not admin */}
                         <ConditionalFloatingContact />
                         <Routes>
-=======
-      <ToastProvider>
-        <SettingsProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <BannerProvider>
-                <SubCategoryProvider>
-                  <SocketProvider>
-                    <BrowserRouter
-                      future={{
-                        v7_startTransition: true,
-                        v7_relativeSplatPath: true,
-                      }}
-                    >
-                      <RouteSeo />
-                      {/* Conditional floating contact bar — only shows on customer pages, not admin */}
-                      <ConditionalFloatingContact />
-                      <Routes>
->>>>>>> a20828ac895fc501691be4c0c0f866160808cea3
                         {/* ---------- Admin login stays outside the storefront shell ---------- */}
                         <Route path="/admin/login" element={<Login adminOnly />} />
 

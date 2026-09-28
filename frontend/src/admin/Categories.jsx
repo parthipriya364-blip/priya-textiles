@@ -371,7 +371,16 @@ export default function Categories() {
               <img src={cat.image?.url} alt={cat.name} />
               <div className="category-admin-info">
                 <h3>{cat.name}</h3>
-                <span>{cat.productsCount || 0} products</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ color: '#8B0000', fontWeight: '600' }}>
+                    {cat.productsCount || 0} products
+                  </span>
+                  {cat.name === 'Women' && cat.subCategoriesCount > 0 && (
+                    <span style={{ color: '#059669', fontSize: '11px', fontWeight: '600' }}>
+                      {cat.subCategoriesCount} sub-categories
+                    </span>
+                  )}
+                </div>
                 {cat.description && <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>{cat.description}</p>}
               </div>
               <div className="row-actions">
@@ -527,7 +536,9 @@ export default function Categories() {
                 </div>
                 <div className="subcat-row-info">
                   <strong>{sc.name}</strong>
-                  <span>Order {sc.displayOrder}{!sc.isActive && " · Disabled"}</span>
+                  <span>
+                    {sc.productsCount || 0} products · Order {sc.displayOrder}{!sc.isActive && " · Disabled"}
+                  </span>
                 </div>
                 <div className="row-actions">
                   <button
