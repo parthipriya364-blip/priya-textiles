@@ -7,20 +7,34 @@ const {
   getMe,
   logout,
   updatePassword,
-  updateProfile
+  updateProfile,
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword,
+  resendOTP
 } = require('../controller/authController');
 const {
   googleCallback,
   googleFailure
 } = require('../controller/googleAuthController');
 const { protect, authorize } = require('../middleware/auth');
+const { 
+  ipRateLimiter, 
+  checkAccountLockout 
+} = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
-// Regular authentication routes
-router.post('/signup', signup);
-router.post('/login', login);
+// Regular authentication routes with rate limiting
+router.post('/signup', ipRateLimiter, signup);
+router.post('/login', ipRateLimiter, checkAccountLockout, login);
 router.get('/users', protect, authorize('admin'), getUsers);
+
+// Password reset routes (public with rate limiting)
+router.post('/forgot-password', ipRateLimiter, forgotPassword);
+router.post('/verify-otp', ipRateLimiter, verifyResetOTP);
+router.post('/reset-password', ipRateLimiter, resetPassword);
+router.post('/resend-otp', ipRateLimiter, resendOTP);
 
 // Google OAuth routes
 router.get(

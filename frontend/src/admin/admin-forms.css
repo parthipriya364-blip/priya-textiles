@@ -310,6 +310,14 @@
   line-height: 1;
 }
 
+.stat-sublabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #9ca3af;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 .stat-change {
   font-size: 13px;
   font-weight: 600;

@@ -14,6 +14,7 @@ import {
 import AdminPageHeader from "./components/AdminPageHeader";
 import Modal from "./components/Modal";
 import { useBanners, MAX_BANNERS } from "../context/BannerContext";
+import { useToast } from "../context/ToastContext";
 import "./admin-forms.css";
 import "./BannerManager.css";
 
@@ -27,6 +28,7 @@ export default function BannerManager() {
     toggleEnabled,
     reorderBanner,
   } = useBanners();
+  const { showToast } = useToast();
 
   const [previewBanner, setPreviewBanner] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -44,7 +46,13 @@ export default function BannerManager() {
   const handleReplaceFile = async (e) => {
     const file = e.target.files?.[0];
     if (file && replaceTargetId.current != null) {
-      await replaceBanner(replaceTargetId.current, file);
+      if (!file.type.startsWith("image/")) {
+        showToast("Please select an image file", "error");
+      } else if (file.size > 5 * 1024 * 1024) {
+        showToast("Image size must be less than 5MB", "error");
+      } else {
+        await replaceBanner(replaceTargetId.current, file);
+      }
     }
     e.target.value = "";
     replaceTargetId.current = null;

@@ -1,7 +1,14 @@
 import axios from 'axios';
 import { getApiUrl } from '../config';
+import { getToken } from './authService';
 
 const API_URL = getApiUrl('banners');
+
+const getAuthHeaders = () => ({
+  headers: {
+    Authorization: `Bearer ${getToken()}`,
+  },
+});
 
 // Get all banners
 export const getBanners = async (enabledOnly = false) => {
@@ -35,7 +42,9 @@ export const createBanner = async (bannerData) => {
     if (bannerData.image) formData.append('image', bannerData.image);
 
     const response = await axios.post(API_URL, formData, {
+      ...getAuthHeaders(),
       headers: {
+        ...getAuthHeaders().headers,
         'Content-Type': 'multipart/form-data',
       },
     });
@@ -57,7 +66,9 @@ export const updateBanner = async (id, bannerData) => {
     if (bannerData.image) formData.append('image', bannerData.image);
 
     const response = await axios.put(`${API_URL}/${id}`, formData, {
+      ...getAuthHeaders(),
       headers: {
+        ...getAuthHeaders().headers,
         'Content-Type': 'multipart/form-data',
       },
     });

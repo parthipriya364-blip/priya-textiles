@@ -71,7 +71,23 @@ const userSchema = new mongoose.Schema({
     type: Date
   },
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  resetPasswordOTP: {
+    type: String,
+    select: false // Don't return OTP by default
+  },
+  resetPasswordOTPExpires: {
+    type: Date,
+    select: false // Don't return OTP expiration by default
+  },
+  resetPasswordToken: {
+    type: String,
+    select: false // Don't return reset token by default
+  },
+  resetPasswordTokenExpires: {
+    type: Date,
+    select: false // Don't return token expiration by default
+  }
 }, {
   timestamps: true
 });
@@ -107,6 +123,9 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   }
 };
 
+// Alias for backward compatibility
+userSchema.methods.matchPassword = userSchema.methods.comparePassword;
+
 // Method to check if password was changed after JWT was issued
 userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
   if (this.passwordChangedAt) {
@@ -122,6 +141,8 @@ userSchema.methods.toJSON = function() {
   delete user.password;
   delete user.passwordResetToken;
   delete user.passwordResetExpires;
+  delete user.resetPasswordOTP;
+  delete user.resetPasswordOTPExpires;
   delete user.googleId;
   return user;
 };

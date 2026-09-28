@@ -200,7 +200,7 @@ export default function Orders() {
             label: "Payment",
             render: (b) => (
               <div>
-                <div>{b.paymentMethod === 'cod' ? 'COD' : b.paymentMethod.toUpperCase()}</div>
+                <div>{b.paymentMethod === 'cod' ? 'Cash on Delivery' : b.paymentMethod.toUpperCase()}</div>
                 <div>{paymentBadge(b.paymentStatus)}</div>
               </div>
             )

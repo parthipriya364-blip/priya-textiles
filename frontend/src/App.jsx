@@ -11,6 +11,7 @@ import { BannerProvider } from "./context/BannerContext";
 import { SubCategoryProvider } from "./context/SubCategoryContext";
 import { SettingsProvider } from "./context/SettingsContext";
 import { SocketProvider } from "./context/SocketContext";
+import { LoadingProvider } from "./context/LoadingContext";
 import ProtectedRoute from "./admin/components/ProtectedRoute";
 
 import Home from "./pages/Home";
@@ -30,6 +31,9 @@ import OrderHistory from "./pages/OrderHistory";
 import OrderDetails from "./pages/OrderDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOTP from "./pages/VerifyOTP";
+import ResetPassword from "./pages/ResetPassword";
 import GoogleAuthSuccess from "./pages/GoogleAuthSuccess";
 import Profile from "./pages/Profile";
 import Contact from "./pages/Contact";
@@ -101,23 +105,24 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <ToastProvider>
-        <SettingsProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <BannerProvider>
-                <SubCategoryProvider>
-                  <SocketProvider>
-                    <BrowserRouter
-                      future={{
-                        v7_startTransition: true,
-                        v7_relativeSplatPath: true,
-                      }}
-                    >
-                      <RouteSeo />
-                      {/* Conditional floating contact bar — only shows on customer pages, not admin */}
-                      <ConditionalFloatingContact />
-                      <Routes>
+      <LoadingProvider>
+        <ToastProvider>
+          <SettingsProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <BannerProvider>
+                  <SubCategoryProvider>
+                    <SocketProvider>
+                      <BrowserRouter
+                        future={{
+                          v7_startTransition: true,
+                          v7_relativeSplatPath: true,
+                        }}
+                      >
+                        <RouteSeo />
+                        {/* Conditional floating contact bar — only shows on customer pages, not admin */}
+                        <ConditionalFloatingContact />
+                        <Routes>
                         {/* ---------- Admin login stays outside the storefront shell ---------- */}
                         <Route path="/admin/login" element={<Login adminOnly />} />
 
@@ -141,6 +146,9 @@ export default function App() {
                           <Route path="/order-details/:bookingId" element={<OrderDetails />} />
                           <Route path="/login" element={<Login />} />
                           <Route path="/register" element={<Register />} />
+                          <Route path="/forgot-password" element={<ForgotPassword />} />
+                          <Route path="/verify-otp" element={<VerifyOTP />} />
+                          <Route path="/reset-password" element={<ResetPassword />} />
                           <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
                           <Route path="/profile" element={<Profile />} />
                           <Route path="/contact" element={<Contact />} />
@@ -170,15 +178,16 @@ export default function App() {
                         </Route>
 
                         <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </BrowserRouter>
-                  </SocketProvider>
-                </SubCategoryProvider>
-              </BannerProvider>
-            </WishlistProvider>
-          </CartProvider>
-        </SettingsProvider>
-      </ToastProvider>
+                        </Routes>
+                      </BrowserRouter>
+                    </SocketProvider>
+                  </SubCategoryProvider>
+                </BannerProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </SettingsProvider>
+        </ToastProvider>
+      </LoadingProvider>
     </AuthProvider>
   );
 }

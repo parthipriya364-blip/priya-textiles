@@ -595,6 +595,177 @@ exports.sendAdminOrderNotification = async (booking) => {
 };
 
 /**
+ * Send account lockout notification email
+ * @param {Object} user - User object
+ * @returns {Promise}
+ */
+exports.sendAccountLockoutEmail = async (user) => {
+  try {
+    if (!process.env.BREVO_API_KEY) {
+      console.warn('⚠️  BREVO_API_KEY not set. Skipping lockout email notification.');
+      return { success: false, message: 'Email service not configured' };
+    }
+
+    const unlockTime = new Date(Date.now() + 15 * 60 * 1000);
+    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Security Alert</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 30px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
+                Account Temporarily Locked
+              </h1>
+              <p style="margin: 10px 0 0; color: #fecaca; font-size: 14px;">
+                Security Alert - Priya Textiles
+              </p>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 20px; color: #111827; font-size: 16px; line-height: 1.6;">
+                Hello <strong>${user.name}</strong>,
+              </p>
+              
+              <p style="margin: 0 0 20px; color: #374151; font-size: 15px; line-height: 1.6;">
+                Your account has been temporarily locked due to multiple unsuccessful login attempts. This is a security measure to protect your account.
+              </p>
+
+              <!-- Info Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 25px;">
+                <tr>
+                  <td style="background-color: #fef2f2; padding: 20px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                    <p style="margin: 0 0 10px; color: #991b1b; font-weight: 600; font-size: 14px;">
+                      ⏰ Lockout Details
+                    </p>
+                    <p style="margin: 0 0 8px; color: #7f1d1d; font-size: 14px;">
+                      <strong>Duration:</strong> 15 minutes
+                    </p>
+                    <p style="margin: 0; color: #7f1d1d; font-size: 14px;">
+                      <strong>Unlocks at:</strong> ${unlockTime.toLocaleString('en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 25px; color: #374151; font-size: 15px; line-height: 1.6;">
+                <strong>What should you do?</strong>
+              </p>
+
+              <ul style="margin: 0 0 25px; padding-left: 20px; color: #4b5563; font-size: 14px; line-height: 1.8;">
+                <li>Wait for 15 minutes before trying to log in again</li>
+                <li>Make sure you're using the correct password</li>
+                <li>If you've forgotten your password, use the password reset option</li>
+                <li>If you didn't attempt to log in, your account may be at risk</li>
+              </ul>
+
+              <!-- Action Buttons -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 25px;">
+                <tr>
+                  <td align="center" style="padding: 10px 0;">
+                    <a href="${resetLink}" 
+                       style="display: inline-block; padding: 14px 30px; background-color: #8B0000; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">
+                      Reset Password
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Security Notice -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background-color: #fffbeb; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <p style="margin: 0 0 10px; color: #92400e; font-weight: 600; font-size: 14px;">
+                      🛡️ Security Tip
+                    </p>
+                    <p style="margin: 0; color: #78350f; font-size: 13px; line-height: 1.6;">
+                      To keep your account secure, never share your password with anyone and use a strong, unique password for your Priya Textiles account.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 10px; color: #6b7280; font-size: 13px;">
+                This is an automated security notification. If you believe this was in error or didn't attempt to log in, please contact our support team immediately.
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                📧 support@priyatextiles.com | 📞 Contact Support
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.sender = {
+      name: 'Priya Textiles Security',
+      email: process.env.BREVO_SENDER_EMAIL,
+    };
+    sendSmtpEmail.to = [
+      {
+        email: user.email,
+        name: user.name,
+      },
+    ];
+    sendSmtpEmail.subject = '🔒 Account Security Alert - Temporary Lockout';
+    sendSmtpEmail.htmlContent = htmlContent;
+
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('✅ Account lockout email sent successfully');
+    console.log('📧 Recipient:', user.email);
+    console.log('📨 Message ID:', result.messageId || 'N/A');
+    console.log('📊 Full response:', JSON.stringify(result, null, 2));
+
+    return {
+      success: true,
+      messageId: result.messageId || result.response?.messageId || 'sent',
+      recipient: user.email
+    };
+  } catch (error) {
+    console.error('❌ Failed to send account lockout email:', error.message);
+    console.error('📋 Error details:', error.response?.body || error);
+    return {
+      success: false,
+      message: error.message,
+      error: error.response?.body || error
+    };
+  }
+};
+
+/**
  * Send order status update email
  * @param {Object} booking - Booking object with updated status
  * @param {String} oldStatus - Previous order status
@@ -872,6 +1043,215 @@ exports.sendOrderStatusUpdate = async (booking, oldStatus) => {
       await emailRecord.save();
     }
     
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
+
+/**
+ * Send password reset OTP email
+ * @param {string} email - User email
+ * @param {string} otp - 6-digit OTP code
+ * @param {string} userName - User's name
+ * @returns {Promise}
+ */
+exports.sendPasswordResetOTP = async (email, otp, userName) => {
+  try {
+    if (!process.env.BREVO_API_KEY) {
+      console.warn('⚠️  BREVO_API_KEY not set. Skipping password reset OTP email.');
+      return { success: false, message: 'Email service not configured' };
+    }
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset OTP</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 10px;">🔐</div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
+                Password Reset Request
+              </h1>
+              <p style="margin: 10px 0 0; color: #e0e7ff; font-size: 14px;">
+                Priya Textiles - Secure Your Account
+              </p>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 20px; color: #111827; font-size: 16px; line-height: 1.6;">
+                Hello <strong>${userName}</strong>,
+              </p>
+              
+              <p style="margin: 0 0 25px; color: #374151; font-size: 15px; line-height: 1.6;">
+                We received a request to reset your password. Use the One-Time Password (OTP) below to proceed with resetting your password.
+              </p>
+
+              <!-- OTP Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 30px;">
+                <tr>
+                  <td style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 30px; border-radius: 12px; text-align: center; border: 2px dashed #667eea;">
+                    <p style="margin: 0 0 10px; color: #4f46e5; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;">
+                      Your OTP Code
+                    </p>
+                    <h2 style="margin: 0; color: #667eea; font-size: 42px; font-weight: 800; letter-spacing: 10px; font-family: 'Courier New', monospace;">
+                      ${otp}
+                    </h2>
+                    <p style="margin: 15px 0 0; color: #6b7280; font-size: 13px;">
+                      Valid for 10 minutes
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Instructions -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 25px;">
+                <tr>
+                  <td style="background-color: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <p style="margin: 0 0 10px; color: #92400e; font-weight: 600; font-size: 14px;">
+                      ⚠️ Important Security Information
+                    </p>
+                    <ul style="margin: 0; padding-left: 20px; color: #78350f; font-size: 14px; line-height: 1.8;">
+                      <li>This OTP is valid for <strong>10 minutes only</strong></li>
+                      <li>Do not share this code with anyone</li>
+                      <li>Our team will never ask for your OTP</li>
+                      <li>If you didn't request this reset, please ignore this email</li>
+                    </ul>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Steps -->
+              <h3 style="margin: 0 0 15px; color: #111827; font-size: 18px; font-weight: 600;">
+                Next Steps:
+              </h3>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                    <table width="100%">
+                      <tr>
+                        <td width="40" valign="top">
+                          <div style="width: 32px; height: 32px; background-color: #667eea; color: #ffffff; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 700; font-size: 14px;">1</div>
+                        </td>
+                        <td>
+                          <p style="margin: 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                            Enter the OTP code on the verification page
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+                    <table width="100%">
+                      <tr>
+                        <td width="40" valign="top">
+                          <div style="width: 32px; height: 32px; background-color: #667eea; color: #ffffff; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 700; font-size: 14px;">2</div>
+                        </td>
+                        <td>
+                          <p style="margin: 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                            Create a new secure password
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0;">
+                    <table width="100%">
+                      <tr>
+                        <td width="40" valign="top">
+                          <div style="width: 32px; height: 32px; background-color: #667eea; color: #ffffff; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 700; font-size: 14px;">3</div>
+                        </td>
+                        <td>
+                          <p style="margin: 0; color: #374151; font-size: 14px; line-height: 1.6;">
+                            Log in with your new credentials
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Didn't Request Section -->
+          <tr>
+            <td style="background-color: #fef2f2; padding: 25px 30px; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 10px; color: #991b1b; font-weight: 600; font-size: 15px;">
+                Didn't request this?
+              </p>
+              <p style="margin: 0; color: #7f1d1d; font-size: 14px; line-height: 1.6;">
+                If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged, and your account is secure.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 10px; color: #6b7280; font-size: 14px;">
+                Need help? Contact our support team
+              </p>
+              <p style="margin: 0 0 20px;">
+                <a href="mailto:support@priyatextiles.com" style="color: #667eea; text-decoration: none; font-weight: 600;">support@priyatextiles.com</a>
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                © ${new Date().getFullYear()} Priya Textiles. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.sender = {
+      name: 'Priya Textiles Security',
+      email: process.env.BREVO_SENDER_EMAIL || 'noreply@priyatextiles.com',
+    };
+    sendSmtpEmail.to = [
+      {
+        email: email,
+        name: userName,
+      },
+    ];
+    sendSmtpEmail.subject = `Password Reset OTP - ${otp}`;
+    sendSmtpEmail.htmlContent = htmlContent;
+
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('✅ Password reset OTP email sent to', email, ':', result.messageId);
+
+    return {
+      success: true,
+      messageId: result.messageId,
+    };
+  } catch (error) {
+    console.error('❌ Failed to send password reset OTP email:', error.message);
     return {
       success: false,
       message: error.message,

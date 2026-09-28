@@ -135,13 +135,15 @@ exports.updateBanner = async (req, res) => {
 
     // Update image if new one uploaded
     if (req.file) {
-      // Delete old image
-      await deleteFromCloudinary(banner.image.public_id);
-
       // Upload new image
       const imageStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
       const imageData = await uploadToCloudinary(imageStr, 'banners');
       updateData.image = imageData;
+
+      // Keep the existing image if the replacement upload fails.
+      if (banner.image?.public_id) {
+        await deleteFromCloudinary(banner.image.public_id);
+      }
     }
 
     // Update banner
