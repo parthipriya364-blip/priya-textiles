@@ -25,7 +25,7 @@ export default function Cart() {
 
   // Shipping configuration from admin settings
   const [shippingConfig, setShippingConfig] = useState({
-    shippingCharge: 149,
+    shippingCharge: 0,
   });
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function Cart() {
         const response = await getPublicSettings();
         if (response.success && response.settings) {
           setShippingConfig({
-            shippingCharge: response.settings.shippingCharge || 149,
+            shippingCharge: response.settings.shippingCharge ?? 0,
           });
         }
       } catch (error) {

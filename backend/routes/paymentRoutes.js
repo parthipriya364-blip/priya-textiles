@@ -18,9 +18,9 @@ const router = express.Router();
 router.get('/razorpay-key', getRazorpayKey);
 router.get('/booking/:id', getBooking);
 
-// Protected routes
-router.post('/create-order', protect, createRazorpayOrder);
-router.post('/verify-and-book', protect, verifyAndCreateBooking);
+// Optional-auth routes
+router.post('/create-order', optionalProtect, createRazorpayOrder);
+router.post('/verify-and-book', optionalProtect, verifyAndCreateBooking);
 router.post('/cod-booking', optionalProtect, createCODBooking); // Allow both logged-in and guest users
 router.get('/my-bookings', protect, getMyBookings);
 router.put('/booking/:id/cancel', protect, cancelBooking);

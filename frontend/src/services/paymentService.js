@@ -27,13 +27,13 @@ export const getRazorpayKey = async () => {
 };
 
 // Create Razorpay Order
-export const createRazorpayOrder = async (amount) => {
+export const createRazorpayOrder = async (bookingData) => {
   try {
-    console.log('📝 Creating Razorpay order for amount:', amount);
+    console.log('📝 Creating Razorpay order...');
     const config = getAxiosConfig();
     const response = await axios.post(
       `${API_URL}/create-order`,
-      { amount, currency: 'INR' },
+      { bookingData },
       config
     );
     console.log('✅ Razorpay order created:', response.data.order.id);

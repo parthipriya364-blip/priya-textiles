@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { isAuthenticated } from "../services/authService";
 import * as cartService from "../services/cartService";
+import { getProduct } from "../services/productService";
 import { useToast } from "./ToastContext";
 
 const CartContext = createContext(null);
@@ -57,8 +58,31 @@ export function CartProvider({ children }) {
           }));
         }
       } else {
-        // Load from localStorage
-        setItems(loadLocalCart());
+        // Refresh persisted guest-cart prices from the current product catalog.
+        const localItems = loadLocalCart();
+        const productIds = [...new Set(localItems.map((item) => item.id).filter(Boolean))];
+        const products = await Promise.all(productIds.map(async (productId) => {
+          try {
+            const response = await getProduct(productId);
+            return [productId, response.product];
+          } catch {
+            return [productId, null];
+          }
+        }));
+        const productsById = new Map(products);
+        setItems(localItems.map((item) => {
+          const product = productsById.get(item.id);
+          return product ? {
+            ...item,
+            name: product.name,
+            image: product.image?.url || product.image,
+            price: product.price,
+            oldPrice: product.oldPrice,
+            stock: product.stock,
+            inStock: product.inStock,
+            paymentMethods: product.paymentMethods || item.paymentMethods,
+          } : item;
+        }));
       }
     } catch (error) {
       console.error('Failed to load cart:', error);

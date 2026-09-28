@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const Booking = require('../models/Booking');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
+const Settings = require('../models/Settings');
 const { sendBookingConfirmation, sendOrderStatusUpdate, sendAdminOrderNotification } = require('../utils/emailService');
 
 // Initialize Razorpay
@@ -11,12 +12,82 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+const getTrustedBookingData = async (bookingData) => {
+  if (!bookingData || !Array.isArray(bookingData.items) || bookingData.items.length === 0) {
+    throw Object.assign(new Error('Order items are required'), { statusCode: 400 });
+  }
+
+  if (!['card', 'upi'].includes(bookingData.paymentMethod)) {
+    throw Object.assign(new Error('Invalid payment method'), { statusCode: 400 });
+  }
+
+  const customer = bookingData.customer;
+  if (!customer || ['name', 'email', 'phone', 'address', 'city', 'state', 'pincode'].some((field) => !customer[field])) {
+    throw Object.assign(new Error('Complete customer information is required'), { statusCode: 400 });
+  }
+
+  const itemQuantities = bookingData.items.map((item) => {
+    const quantity = Number(item.quantity);
+    if (!item.product || !Number.isInteger(quantity) || quantity < 1) {
+      throw Object.assign(new Error('Invalid order item'), { statusCode: 400 });
+    }
+    return { ...item, quantity };
+  });
+
+  const productIds = [...new Set(itemQuantities.map((item) => String(item.product)))];
+  const products = await Product.find({ _id: { $in: productIds }, isActive: true });
+  const productsById = new Map(products.map((product) => [product._id.toString(), product]));
+  const quantitiesByProduct = new Map();
+
+  for (const item of itemQuantities) {
+    const productId = String(item.product);
+    const product = productsById.get(productId);
+    if (!product) {
+      throw Object.assign(new Error('One or more products are unavailable'), { statusCode: 400 });
+    }
+    quantitiesByProduct.set(productId, (quantitiesByProduct.get(productId) || 0) + item.quantity);
+  }
+
+  for (const [productId, quantity] of quantitiesByProduct) {
+    if (productsById.get(productId).stock < quantity) {
+      throw Object.assign(new Error(`Insufficient stock for ${productsById.get(productId).name}`), { statusCode: 400 });
+    }
+  }
+
+  const items = itemQuantities.map((item) => {
+    const product = productsById.get(String(item.product));
+    return {
+      product: product._id,
+      name: product.name,
+      image: product.image?.url || '',
+      price: product.price,
+      quantity: item.quantity,
+      size: item.size || 'Free Size',
+    };
+  });
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const settings = await Settings.findOne().sort({ createdAt: -1 });
+  const shipping = settings?.shippingCharge ?? 0;
+
+  return {
+    items,
+    customer: bookingData.customer,
+    subtotal,
+    shipping,
+    total: subtotal + shipping,
+    paymentMethod: bookingData.paymentMethod,
+  };
+};
+
 // @desc    Create Razorpay order
 // @route   POST /api/payments/create-order
 // @access  Private
 exports.createRazorpayOrder = async (req, res) => {
   try {
-    const { amount, currency = 'INR', receipt } = req.body;
+    const { bookingData, receipt } = req.body;
+    const trustedBookingData = await getTrustedBookingData(bookingData);
+    const amount = trustedBookingData.total;
+    const currency = 'INR';
 
     console.log('📝 Creating Razorpay order...');
     console.log('   Amount: ₹', amount);
@@ -33,7 +104,7 @@ exports.createRazorpayOrder = async (req, res) => {
     // Create Razorpay order
     const options = {
       amount: Math.round(amount * 100), // Amount in paise (convert to integer)
-      currency: currency,
+      currency,
       receipt: receipt || `receipt_${Date.now()}`,
       payment_capture: 1, // Auto capture payment
     };
@@ -52,7 +123,7 @@ exports.createRazorpayOrder = async (req, res) => {
   } catch (error) {
     console.error('❌ Create Razorpay order error:', error);
     console.error('   Error message:', error.message);
-    res.status(500).json({
+    res.status(error.statusCode || 500).json({
       success: false,
       message: 'Failed to create Razorpay order',
       error: error.message,
@@ -101,8 +172,17 @@ exports.verifyAndCreateBooking = async (req, res) => {
       });
     }
 
+    const trustedBookingData = await getTrustedBookingData(bookingData);
+    const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
+    if (razorpayOrder.amount !== Math.round(trustedBookingData.total * 100) || razorpayOrder.currency !== 'INR') {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment amount does not match the order total',
+      });
+    }
+
     // Payment verified successfully, create booking
-    const { items, customer, subtotal, shipping, total, paymentMethod } = bookingData;
+    const { items, customer, subtotal, shipping, total, paymentMethod } = trustedBookingData;
 
     // Validate products and stock
     for (const item of items) {
@@ -221,7 +301,7 @@ exports.verifyAndCreateBooking = async (req, res) => {
     });
   } catch (error) {
     console.error('Verify and create booking error:', error);
-    res.status(500).json({
+    res.status(error.statusCode || 500).json({
       success: false,
       message: 'Payment verification or booking creation failed',
       error: error.message,

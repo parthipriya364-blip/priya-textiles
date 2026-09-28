@@ -53,7 +53,7 @@ export default function Settings() {
         youtube: response.settings.youtube || "",
         whatsapp: response.settings.whatsapp || "",
         gstNumber: response.settings.gstNumber || "",
-        shippingCharge: String(response.settings.shippingCharge || 0),
+        shippingCharge: String(response.settings.shippingCharge ?? 0),
         storeDescription: response.settings.storeDescription || "",
         businessHours: response.settings.businessHours || {
           monday: "9:00 AM - 6:00 PM",

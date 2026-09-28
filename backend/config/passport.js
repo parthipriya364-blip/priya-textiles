@@ -14,29 +14,33 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          // Extract user info from Google profile
-          const email = profile.emails[0].value;
+          const email = profile.emails?.[0]?.value?.trim().toLowerCase();
           const name = profile.displayName;
           const googleId = profile.id;
 
-          // Check if user already exists
+          if (!email || profile._json?.email_verified !== true) {
+            return done(new Error('Google account must have a verified email address'));
+          }
+
           let user = await User.findOne({ email });
 
           if (user) {
-            // User exists - update Google ID if not set
+            if (user.googleId && user.googleId !== googleId) {
+              return done(new Error('This email is linked to another Google account'));
+            }
+
             if (!user.googleId) {
               user.googleId = googleId;
               await user.save({ validateBeforeSave: false });
             }
+
             return done(null, user);
           }
 
-          // Create new user
           user = await User.create({
             name,
             email,
             googleId,
-            password: Math.random().toString(36).slice(-8), // Random password (won't be used)
             isGoogleUser: true,
             role: 'user',
           });

@@ -29,7 +29,7 @@ export default function Checkout() {
   
   // Shipping configuration from admin settings
   const [shippingConfig, setShippingConfig] = useState({
-    shippingCharge: 149,
+    shippingCharge: 0,
   });
   
   const [customerData, setCustomerData] = useState({
@@ -54,7 +54,7 @@ export default function Checkout() {
         const response = await getPublicSettings();
         if (response.success && response.settings) {
           setShippingConfig({
-            shippingCharge: response.settings.shippingCharge || 149,
+            shippingCharge: response.settings.shippingCharge ?? 0,
           });
         }
       } catch (error) {
@@ -235,12 +235,6 @@ export default function Checkout() {
       const razorpayKey = keyData.key;
       console.log('✅ Razorpay key received:', razorpayKey);
 
-      // Create order
-      console.log('📝 Creating Razorpay order for amount:', total);
-      const orderData = await createRazorpayOrder(total);
-      const { order } = orderData;
-      console.log('✅ Order created successfully:', order.id);
-
       // Prepare booking data
       const bookingData = {
         items: items.map((item) => ({
@@ -257,6 +251,11 @@ export default function Checkout() {
         total,
         paymentMethod,
       };
+
+      // Create order using the cart; the backend calculates the trusted total.
+      const orderData = await createRazorpayOrder(bookingData);
+      const { order } = orderData;
+      console.log('✅ Order created successfully:', order.id);
 
       // Razorpay options
       const options = {
