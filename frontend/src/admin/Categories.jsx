@@ -291,6 +291,9 @@ export default function Categories() {
 
       setSubModalOpen(false);
       loadSubCategories();
+      
+      // Trigger refresh event for frontend
+      window.dispatchEvent(new Event('refreshSubCategories'));
     } catch (error) {
       showToast(error.message || 'Failed to save subcategory', 'error');
     } finally {
@@ -308,6 +311,9 @@ export default function Categories() {
       showToast('Subcategory deleted successfully!', 'success');
       setDeleteSubTarget(null);
       loadSubCategories();
+      
+      // Trigger refresh event for frontend
+      window.dispatchEvent(new Event('refreshSubCategories'));
     } catch (error) {
       showToast(error.message || 'Failed to delete subcategory', 'error');
     } finally {
@@ -320,6 +326,9 @@ export default function Categories() {
     try {
       await reorderSubCategory(id, direction);
       loadSubCategories();
+      
+      // Trigger refresh event for frontend
+      window.dispatchEvent(new Event('refreshSubCategories'));
     } catch (error) {
       showToast(error.message || 'Failed to reorder', 'error');
     }
@@ -331,6 +340,9 @@ export default function Categories() {
       await toggleSubCategoryStatus(id);
       showToast('Status updated successfully!', 'success');
       loadSubCategories();
+      
+      // Trigger refresh event for frontend
+      window.dispatchEvent(new Event('refreshSubCategories'));
     } catch (error) {
       showToast(error.message || 'Failed to toggle status', 'error');
     }

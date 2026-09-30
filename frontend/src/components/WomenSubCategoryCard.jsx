@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import "./style/WomenSubCategoryCard.css";
 
 const slugify = (name) =>
@@ -9,16 +10,41 @@ const slugify = (name) =>
     .replace(/(^-|-$)/g, "");
 
 export default function WomenSubCategoryCard({ subCategory, active = false }) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  const handleImageError = () => {
+    console.warn(`⚠️ Failed to load image for ${subCategory.name}:`, subCategory.image);
+    setImageError(true);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const showFallback = !subCategory.image || imageError;
+
   return (
     <Link
       to={`/women/${slugify(subCategory.name)}`}
       className={`wsc-card ${active ? "active" : ""}`}
     >
       <div className="wsc-image-wrap">
-        {subCategory.image ? (
-          <img src={subCategory.image} alt={subCategory.name} />
-        ) : (
+        {showFallback ? (
           <div className="wsc-fallback" aria-hidden="true">
+            {subCategory.name.charAt(0)}
+          </div>
+        ) : (
+          <img 
+            src={subCategory.image} 
+            alt={subCategory.name}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            style={{ display: imageLoaded ? 'block' : 'none' }}
+          />
+        )}
+        {!showFallback && !imageLoaded && (
+          <div className="wsc-fallback wsc-loading" aria-hidden="true">
             {subCategory.name.charAt(0)}
           </div>
         )}

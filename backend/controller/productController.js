@@ -11,15 +11,21 @@ exports.getProducts = async (req, res) => {
   try {
     const { category, subCategory, featured, isNew, minPrice, maxPrice, inStock, search } = req.query;
     
+    console.log('🔍 Get Products Query:', { category, subCategory, featured, isNew, inStock });
+    
     // Build query
     let query = { isActive: true };
     
     if (category) {
       query.categoryName = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+      console.log('   📁 Category filter:', query.categoryName);
     }
     
     if (subCategory) {
-      query.subCategoryName = subCategory.charAt(0).toUpperCase() + subCategory.slice(1).toLowerCase();
+      // Case-insensitive subcategory matching
+      const subCatFormatted = subCategory.charAt(0).toUpperCase() + subCategory.slice(1).toLowerCase();
+      query.subCategoryName = { $regex: new RegExp(`^${subCatFormatted}$`, 'i') };
+      console.log('   📂 SubCategory filter:', subCatFormatted);
     }
     
     if (featured === 'true') {
@@ -54,10 +60,14 @@ exports.getProducts = async (req, res) => {
       ];
     }
 
+    console.log('   🔎 Final query:', JSON.stringify(query, null, 2));
+
     const products = await Product.find(query)
       .populate('category', 'name slug')
       .populate('subCategory', 'name slug')
       .sort({ createdAt: -1 });
+
+    console.log('   ✅ Found products:', products.length);
 
     res.status(200).json({
       success: true,
@@ -65,7 +75,7 @@ exports.getProducts = async (req, res) => {
       products,
     });
   } catch (error) {
-    console.error('Get products error:', error);
+    console.error('❌ Get products error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products',

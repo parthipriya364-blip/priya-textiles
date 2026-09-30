@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { FaHeart, FaRegHeart, FaShoppingBag, FaEye } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -12,12 +13,18 @@ export default function ProductCard({ product }) {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const [imageError, setImageError] = useState(false);
   
   const productId = product._id || product.id;
   const productPath = product.slug ? `/product/${product.slug}` : `/product/${productId}`;
   const wishlisted = isWishlisted(productId);
   const discount = discountPercent(product.price, product.oldPrice);
   const productImage = product.image?.url || product.image;
+
+  const handleImageError = () => {
+    console.warn(`⚠️ Failed to load product image for ${product.name}:`, productImage);
+    setImageError(true);
+  };
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -49,7 +56,18 @@ export default function ProductCard({ product }) {
   return (
     <Link to={productPath} className="product-card">
       <div className="product-card-media">
-        <img src={productImage} alt={`${product.name} - PRIYA TEXTILES`} loading="lazy" />
+        {imageError ? (
+          <div className="product-image-fallback">
+            <span>{product.name.charAt(0)}</span>
+          </div>
+        ) : (
+          <img 
+            src={productImage} 
+            alt={`${product.name} - PRIYA TEXTILES`} 
+            loading="lazy"
+            onError={handleImageError}
+          />
+        )}
         <div className="product-card-badges">
           {product.isNew && <span className="badge badge-new">New</span>}
           {product.isFeatured && <span className="badge badge-featured">Featured</span>}

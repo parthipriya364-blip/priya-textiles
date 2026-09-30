@@ -14,15 +14,29 @@ export function SubCategoryProvider({ children }) {
 
   useEffect(() => {
     loadSubCategories();
+    
+    // Listen for refresh events from admin panel
+    const handleRefresh = () => {
+      console.log('🔄 SubCategory refresh event received');
+      loadSubCategories();
+    };
+    
+    window.addEventListener('refreshSubCategories', handleRefresh);
+    
+    return () => {
+      window.removeEventListener('refreshSubCategories', handleRefresh);
+    };
   }, []);
 
   const loadSubCategories = async () => {
     try {
+      console.log('📥 Loading subcategories...');
       setLoading(true);
       const data = await getSubCategories(); // Get all subcategories
+      console.log('✅ Subcategories loaded:', data.subcategories?.length || 0);
       setSubCategories(data.subcategories || []);
     } catch (error) {
-      console.error('Failed to load subcategories:', error);
+      console.error('❌ Failed to load subcategories:', error);
       setSubCategories([]);
     } finally {
       setLoading(false);
@@ -49,8 +63,11 @@ export function SubCategoryProvider({ children }) {
     category: 'women',
   }));
 
+  console.log('👗 Active Women subcategories:', activeWomenSubCategories.length);
+
   // Refresh function that can be called from admin panel
   const refresh = () => {
+    console.log('🔄 Manual refresh triggered');
     loadSubCategories();
   };
 
