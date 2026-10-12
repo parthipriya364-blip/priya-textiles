@@ -66,8 +66,45 @@ const getTrustedBookingData = async (bookingData) => {
     };
   });
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const settings = await Settings.findOne().sort({ createdAt: -1 });
-  const shipping = settings?.shippingCharge ?? 0;
+  
+  // Calculate shipping based on customer's state
+  const state = customer.state?.toLowerCase().trim();
+  let shipping = 200; // Default for other states
+  
+  // Tamil Nadu - ₹40
+  if (state === "tamil nadu" || state === "tamilnadu" || state === "tn") {
+    shipping = 40;
+  }
+  // South India - ₹90 (Kerala, Karnataka, Andhra Pradesh, Telangana, Puducherry, Lakshadweep)
+  else if (
+    state === "kerala" || state === "kl" ||
+    state === "karnataka" || state === "ka" ||
+    state === "andhra pradesh" || state === "andhrapradesh" || state === "ap" ||
+    state === "telangana" || state === "ts" || state === "tg" ||
+    state === "puducherry" || state === "pondicherry" || state === "py" ||
+    state === "lakshadweep" || state === "ld"
+  ) {
+    shipping = 90;
+  }
+  // North India - ₹200 (Delhi, UP, Rajasthan, Punjab, Haryana, HP, Uttarakhand, J&K, Ladakh, Chandigarh)
+  else if (
+    state === "delhi" || state === "dl" ||
+    state === "uttar pradesh" || state === "uttarpradesh" || state === "up" ||
+    state === "rajasthan" || state === "rj" ||
+    state === "punjab" || state === "pb" ||
+    state === "haryana" || state === "hr" ||
+    state === "himachal pradesh" || state === "himachalpradesh" || state === "hp" ||
+    state === "uttarakhand" || state === "uk" || state === "uttaranchal" ||
+    state === "jammu and kashmir" || state === "jammu & kashmir" || state === "j&k" || state === "jk" ||
+    state === "ladakh" || state === "la" ||
+    state === "chandigarh" || state === "ch"
+  ) {
+    shipping = 200;
+  }
+  // Other States - ₹200 (All remaining states)
+  // This includes: Maharashtra, Gujarat, Goa, Dadra and Nagar Haveli and Daman and Diu,
+  // Chhattisgarh, Madhya Pradesh, Andaman and Nicobar Islands, Bihar, Jharkhand,
+  // Odisha, West Bengal, Sikkim, Northeast states, etc.
 
   return {
     items,
@@ -328,7 +365,7 @@ exports.createCODBooking = async (req, res) => {
       });
     }
 
-    if (!customer || !customer.name || !customer.email || !customer.phone || !customer.address) {
+    if (!customer || !customer.name || !customer.email || !customer.phone || !customer.address || !customer.state) {
       return res.status(400).json({
         success: false,
         message: 'Complete customer information is required',
@@ -342,7 +379,49 @@ exports.createCODBooking = async (req, res) => {
       });
     }
 
+    // Calculate expected shipping based on state
+    const state = customer.state?.toLowerCase().trim();
+    let expectedShipping = 200; // Default for other states
+    
+    // Tamil Nadu - ₹40
+    if (state === "tamil nadu" || state === "tamilnadu" || state === "tn") {
+      expectedShipping = 40;
+    }
+    // South India - ₹90
+    else if (
+      state === "kerala" || state === "kl" ||
+      state === "karnataka" || state === "ka" ||
+      state === "andhra pradesh" || state === "andhrapradesh" || state === "ap" ||
+      state === "telangana" || state === "ts" || state === "tg" ||
+      state === "puducherry" || state === "pondicherry" || state === "py" ||
+      state === "lakshadweep" || state === "ld"
+    ) {
+      expectedShipping = 90;
+    }
+    // North India & Other States - ₹200
+    else if (
+      state === "delhi" || state === "dl" ||
+      state === "uttar pradesh" || state === "uttarpradesh" || state === "up" ||
+      state === "rajasthan" || state === "rj" ||
+      state === "punjab" || state === "pb" ||
+      state === "haryana" || state === "hr" ||
+      state === "himachal pradesh" || state === "himachalpradesh" || state === "hp" ||
+      state === "uttarakhand" || state === "uk" || state === "uttaranchal" ||
+      state === "jammu and kashmir" || state === "jammu & kashmir" || state === "j&k" || state === "jk" ||
+      state === "ladakh" || state === "la" ||
+      state === "chandigarh" || state === "ch"
+    ) {
+      expectedShipping = 200;
+    }
+
+    // Validate shipping amount matches expected amount
+    if (Number(shipping) !== expectedShipping) {
+      console.warn(`⚠️  Shipping mismatch: Expected ₹${expectedShipping} for ${customer.state}, got ₹${shipping}`);
+      // Use server-calculated shipping for security
+    }
+
     // Validate products and stock
+    let calculatedSubtotal = 0;
     for (const item of items) {
       const product = await Product.findById(item.product);
       
@@ -359,16 +438,29 @@ exports.createCODBooking = async (req, res) => {
           message: `Insufficient stock for ${product.name}. Available: ${product.stock}`,
         });
       }
+
+      // Calculate subtotal from actual product prices
+      calculatedSubtotal += product.price * item.quantity;
     }
+
+    // Use server-calculated values for security
+    const trustedSubtotal = calculatedSubtotal;
+    const trustedShipping = expectedShipping;
+    const trustedTotal = trustedSubtotal + trustedShipping;
+
+    console.log('💰 Calculated amounts:');
+    console.log('   Subtotal: ₹', trustedSubtotal);
+    console.log('   Shipping: ₹', trustedShipping);
+    console.log('   Total: ₹', trustedTotal);
 
     // Create booking (with user ID if authenticated)
     const booking = await Booking.create({
       user: req.user ? req.user.id : null,
       items,
       customer,
-      subtotal,
-      shipping,
-      total,
+      subtotal: trustedSubtotal,
+      shipping: trustedShipping,
+      total: trustedTotal,
       paymentMethod: 'cod',
       paymentStatus: 'pending',
       orderStatus: 'confirmed',

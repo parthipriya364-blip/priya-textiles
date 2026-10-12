@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { getStoredUser } from "../services/authService";
-import { getPublicSettings } from "../services/settingsService";
 import {
   getRazorpayKey,
   createRazorpayOrder,
@@ -11,6 +10,45 @@ import {
   createCODBooking,
 } from "../services/paymentService";
 import { FaCreditCard, FaMobileAlt, FaMoneyBillWave, FaLock } from "react-icons/fa";
+import { 
+  TAMIL_NADU_DISTRICTS, 
+  KERALA_DISTRICTS,
+  KARNATAKA_CITIES,
+  ANDHRA_PRADESH_CITIES,
+  TELANGANA_CITIES,
+  PUDUCHERRY_DISTRICTS,
+  LAKSHADWEEP_DISTRICTS,
+  DELHI_CITIES,
+  UTTAR_PRADESH_CITIES,
+  RAJASTHAN_CITIES,
+  PUNJAB_CITIES,
+  HARYANA_CITIES,
+  HIMACHAL_PRADESH_CITIES,
+  UTTARAKHAND_CITIES,
+  JAMMU_KASHMIR_CITIES,
+  LADAKH_CITIES,
+  CHANDIGARH_AREAS,
+  MAHARASHTRA_CITIES,
+  GUJARAT_CITIES,
+  GOA_DISTRICTS,
+  DADRA_NAGAR_HAVELI_DAMAN_DIU_AREAS,
+  CHHATTISGARH_CITIES,
+  MADHYA_PRADESH_CITIES,
+  ANDAMAN_NICOBAR_ISLANDS,
+  BIHAR_CITIES,
+  JHARKHAND_CITIES,
+  ODISHA_CITIES,
+  WEST_BENGAL_CITIES,
+  SIKKIM_DISTRICTS,
+  ARUNACHAL_PRADESH_CITIES,
+  ASSAM_CITIES,
+  MANIPUR_CITIES,
+  MEGHALAYA_CITIES,
+  MIZORAM_CITIES,
+  NAGALAND_CITIES,
+  TRIPURA_CITIES,
+  calculateShipping 
+} from "../utils/shippingConfig";
 import "./style/Checkout.css";
 
 export default function Checkout() {
@@ -27,11 +65,6 @@ export default function Checkout() {
     cod: true,
   });
   
-  // Shipping configuration from admin settings
-  const [shippingConfig, setShippingConfig] = useState({
-    shippingCharge: 0,
-  });
-  
   const [customerData, setCustomerData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -42,29 +75,12 @@ export default function Checkout() {
     pincode: user?.address?.zipCode || "",
   });
 
-  // Calculate totals using admin-configured shipping
+  const [showOtherCityInput, setShowOtherCityInput] = useState(false);
+
+  // Calculate shipping dynamically based on city and state
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = shippingConfig.shippingCharge;
+  const shipping = calculateShipping(customerData.city, customerData.state);
   const total = subtotal + shipping;
-
-  useEffect(() => {
-    // Fetch shipping configuration from admin settings
-    const fetchShippingConfig = async () => {
-      try {
-        const response = await getPublicSettings();
-        if (response.success && response.settings) {
-          setShippingConfig({
-            shippingCharge: response.settings.shippingCharge ?? 0,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch shipping config:', error);
-        // Use default values if fetch fails
-      }
-    };
-
-    fetchShippingConfig();
-  }, []);
 
   useEffect(() => {
     if (items.length === 0) {
@@ -157,10 +173,39 @@ export default function Checkout() {
   };
 
   const handleInputChange = (e) => {
-    setCustomerData({
-      ...customerData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    
+    // Handle state change - reset city when state changes
+    if (name === "state") {
+      setCustomerData({
+        ...customerData,
+        state: value,
+        city: "", // Reset city when state changes
+      });
+      setShowOtherCityInput(false); // Reset other city input
+    } 
+    // Handle city change - check if "Other" is selected
+    else if (name === "city") {
+      if (value === "Other") {
+        setShowOtherCityInput(true);
+        setCustomerData({
+          ...customerData,
+          city: "", // Clear city to allow manual input
+        });
+      } else {
+        setShowOtherCityInput(false);
+        setCustomerData({
+          ...customerData,
+          city: value,
+        });
+      }
+    } 
+    else {
+      setCustomerData({
+        ...customerData,
+        [name]: value,
+      });
+    }
   };
 
   const validateForm = () => {
@@ -467,29 +512,1073 @@ export default function Checkout() {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="city">City *</label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={customerData.city}
-                      onChange={handleInputChange}
-                      placeholder="City"
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
                     <label htmlFor="state">State *</label>
-                    <input
-                      type="text"
+                    <select
                       id="state"
                       name="state"
                       value={customerData.state}
                       onChange={handleInputChange}
-                      placeholder="State"
                       required
-                    />
+                    >
+                      <option value="">Select State</option>
+                      <optgroup label="Tamil Nadu">
+                        <option value="Tamil Nadu">Tamil Nadu (₹40)</option>
+                      </optgroup>
+                      <optgroup label="South India - ₹90">
+                        <option value="Kerala">Kerala</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Puducherry">Puducherry</option>
+                        <option value="Lakshadweep">Lakshadweep</option>
+                      </optgroup>
+                      <optgroup label="North India - ₹200">
+                        <option value="Delhi">Delhi</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                        <option value="Ladakh">Ladakh</option>
+                        <option value="Chandigarh">Chandigarh</option>
+                      </optgroup>
+                      <optgroup label="Other States - ₹200">
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="West Bengal">West Bengal</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Other">Other</option>
+                      </optgroup>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="city">City / District *</label>
+                    {customerData.state === "Tamil Nadu" ? (
+                      <>
+                        <select
+                          id="city"
+                          name="city"
+                          value={showOtherCityInput ? "Other" : customerData.city}
+                          onChange={handleInputChange}
+                          required={!showOtherCityInput}
+                        >
+                          <option value="">Select District</option>
+                          {TAMIL_NADU_DISTRICTS.map((district) => (
+                            <option key={district} value={district}>
+                              {district}
+                            </option>
+                          ))}
+                          <option value="Other">Other (Enter manually)</option>
+                        </select>
+                        {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city/district name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Kerala" ? (
+                      <>
+                        <select
+                          id="city"
+                          name="city"
+                          value={showOtherCityInput ? "Other" : customerData.city}
+                          onChange={handleInputChange}
+                          required={!showOtherCityInput}
+                        >
+                          <option value="">Select District</option>
+                          {KERALA_DISTRICTS.map((district) => (
+                            <option key={district} value={district}>
+                              {district}
+                            </option>
+                          ))}
+                          <option value="Other">Other (Enter manually)</option>
+                        </select>
+                        {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city/district name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Karnataka" ? (
+                      <>
+                        <select
+                          id="city"
+                          name="city"
+                          value={showOtherCityInput ? "Other" : customerData.city}
+                          onChange={handleInputChange}
+                          required={!showOtherCityInput}
+                        >
+                          <option value="">Select City</option>
+                          {KARNATAKA_CITIES.map((city) => (
+                            <option key={city} value={city}>
+                              {city}
+                            </option>
+                          ))}
+                          <option value="Other">Other (Enter manually)</option>
+                        </select>
+                        {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Andhra Pradesh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {ANDHRA_PRADESH_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Telangana" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {TELANGANA_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Puducherry" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select District</option>
+                        {PUDUCHERRY_DISTRICTS.map((district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Lakshadweep" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select District</option>
+                        {LAKSHADWEEP_DISTRICTS.map((district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Delhi" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select Area</option>
+                        {DELHI_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Uttar Pradesh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {UTTAR_PRADESH_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Rajasthan" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {RAJASTHAN_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Punjab" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {PUNJAB_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Haryana" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {HARYANA_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Himachal Pradesh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {HIMACHAL_PRADESH_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Uttarakhand" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {UTTARAKHAND_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Jammu and Kashmir" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {JAMMU_KASHMIR_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Ladakh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {LADAKH_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Chandigarh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select Area</option>
+                        {CHANDIGARH_AREAS.map((area) => (
+                          <option key={area} value={area}>
+                            {area}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Maharashtra" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {MAHARASHTRA_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Gujarat" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {GUJARAT_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Goa" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select District</option>
+                        {GOA_DISTRICTS.map((district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Dadra and Nagar Haveli and Daman and Diu" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select Area</option>
+                        {DADRA_NAGAR_HAVELI_DAMAN_DIU_AREAS.map((area) => (
+                          <option key={area} value={area}>
+                            {area}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Chhattisgarh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {CHHATTISGARH_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Madhya Pradesh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {MADHYA_PRADESH_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Andaman and Nicobar Islands" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select Island</option>
+                        {ANDAMAN_NICOBAR_ISLANDS.map((island) => (
+                          <option key={island} value={island}>
+                            {island}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Bihar" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {BIHAR_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Jharkhand" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {JHARKHAND_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Odisha" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {ODISHA_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "West Bengal" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {WEST_BENGAL_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Sikkim" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select District</option>
+                        {SIKKIM_DISTRICTS.map((district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Arunachal Pradesh" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {ARUNACHAL_PRADESH_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Assam" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {ASSAM_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Manipur" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {MANIPUR_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Meghalaya" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {MEGHALAYA_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Mizoram" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {MIZORAM_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : customerData.state === "Nagaland" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {NAGALAND_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>
+                    {showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+) : customerData.state === "Tripura" ? (
+                      <><select
+                        id="city"
+                        name="city"
+                        value={showOtherCityInput ? "Other" : customerData.city}
+                        onChange={handleInputChange}
+                        required={!showOtherCityInput}
+                      >
+                        <option value="">Select City</option>
+                        {TRIPURA_CITIES.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      <option value="Other">Other (Enter manually)</option></select>{showOtherCityInput && (
+                          <input
+                            type="text"
+                            id="city-other"
+                            name="city"
+                            value={customerData.city}
+                            onChange={handleInputChange}
+                            placeholder="Enter your city name"
+                            required
+                            style={{ marginTop: "10px" }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        value={customerData.city}
+                        onChange={handleInputChange}
+                        placeholder="Enter City"
+                        required
+                      />
+                    )}
                   </div>
 
                   <div className="form-group">
@@ -505,6 +1594,57 @@ export default function Checkout() {
                       required
                     />
                   </div>
+                </div>
+                
+                {/* Shipping charge indicator */}
+                <div className="shipping-info">
+                  <p>
+                    📦 Shipping Charge: <strong>₹{shipping}</strong>
+                    {customerData.state === "Tamil Nadu" && customerData.city && (
+                      <span className="shipping-note"> (Tamil Nadu)</span>
+                    )}
+                    {(customerData.state === "Kerala" || 
+                      customerData.state === "Karnataka" || 
+                      customerData.state === "Andhra Pradesh" || 
+                      customerData.state === "Telangana" || 
+                      customerData.state === "Puducherry" ||
+                      customerData.state === "Lakshadweep") && customerData.city && (
+                      <span className="shipping-note"> (South India)</span>
+                    )}
+                    {(customerData.state === "Delhi" || 
+                      customerData.state === "Uttar Pradesh" || 
+                      customerData.state === "Rajasthan" || 
+                      customerData.state === "Punjab" || 
+                      customerData.state === "Haryana" || 
+                      customerData.state === "Himachal Pradesh" || 
+                      customerData.state === "Uttarakhand" || 
+                      customerData.state === "Jammu and Kashmir" || 
+                      customerData.state === "Ladakh" ||
+                      customerData.state === "Chandigarh") && customerData.city && (
+                      <span className="shipping-note"> (North India)</span>
+                    )}
+                    {(customerData.state === "Maharashtra" || 
+                      customerData.state === "Gujarat" || 
+                      customerData.state === "Goa" || 
+                      customerData.state === "Dadra and Nagar Haveli and Daman and Diu" || 
+                      customerData.state === "Chhattisgarh" || 
+                      customerData.state === "Madhya Pradesh" || 
+                      customerData.state === "Andaman and Nicobar Islands" || 
+                      customerData.state === "Bihar" || 
+                      customerData.state === "Jharkhand" || 
+                      customerData.state === "Odisha" || 
+                      customerData.state === "West Bengal" || 
+                      customerData.state === "Sikkim" || 
+                      customerData.state === "Arunachal Pradesh" || 
+                      customerData.state === "Assam" || 
+                      customerData.state === "Manipur" || 
+                      customerData.state === "Meghalaya" || 
+                      customerData.state === "Mizoram" || 
+                      customerData.state === "Nagaland" || 
+                      customerData.state === "Tripura") && customerData.city && (
+                      <span className="shipping-note"> (Other States)</span>
+                    )}
+                  </p>
                 </div>
               </div>
 

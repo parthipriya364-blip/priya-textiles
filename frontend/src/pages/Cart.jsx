@@ -6,7 +6,6 @@ import QuantitySelector from "../components/QuantitySelector";
 import { useCart } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
-import { getPublicSettings } from "../services/settingsService";
 import { formatPrice } from "../utils/formatPrice";
 import "./style/Cart.css";
 
@@ -23,34 +22,9 @@ export default function Cart() {
     }
   }, [user, navigate, location.pathname]);
 
-  // Shipping configuration from admin settings
-  const [shippingConfig, setShippingConfig] = useState({
-    shippingCharge: 0,
-  });
-
-  useEffect(() => {
-    // Fetch shipping configuration from admin settings
-    const fetchShippingConfig = async () => {
-      try {
-        const response = await getPublicSettings();
-        if (response.success && response.settings) {
-          setShippingConfig({
-            shippingCharge: response.settings.shippingCharge ?? 0,
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch shipping config:', error);
-        // Use default values if fetch fails
-      }
-    };
-
-    fetchShippingConfig();
-  }, []);
-
   if (!user) return null;
 
-  const shipping = subtotal === 0 ? 0 : shippingConfig.shippingCharge;
-  const total = subtotal + shipping;
+  const total = subtotal;
 
   return (
     <div className="page-enter">
@@ -107,10 +81,6 @@ export default function Cart() {
                     <span>-{formatPrice(savings)}</span>
                   </div>
                 )}
-                <div className="cart-summary-row">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
-                </div>
                 <div className="cart-summary-row cart-total">
                   <span>Total</span>
                   <span>{formatPrice(total)}</span>
