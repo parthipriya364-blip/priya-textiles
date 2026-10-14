@@ -115,7 +115,36 @@
   .hero-slider-dot.active {
     width: 20px;
   }
+  
+  .hero-slide {
+    object-fit: cover; /* Ensure images cover the full area */
+    object-position: center; /* Center the image */
+  }
+}
 
+@media (max-width: 576px) {
+  .hero-slider-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+  }
+
+  .hero-slider-arrow.prev { left: 8px; }
+  .hero-slider-arrow.next { right: 8px; }
+
+  .hero-slider-dots {
+    bottom: 12px;
+    gap: 6px;
+  }
+
+  .hero-slider-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .hero-slider-dot.active {
+    width: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

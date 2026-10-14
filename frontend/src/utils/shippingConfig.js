@@ -197,7 +197,7 @@ export const HARYANA_CITIES = [
   "Panipat",
   "Karnal",
   "Ambala",
-  "Hisar",
+  "Hisar", 
   "Rohtak",
   "Sonipat",
   "Yamunanagar"
