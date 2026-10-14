@@ -46,7 +46,7 @@ export default function Home() {
       <Hero />
       <section className="section home-intro">
         <div className="container section-title">
-          <h1>PRIYA TEXTILES: Sarees and Ethnic Wear for Every Occasion</h1>
+          <h1>PRIYA TEXTILES: Sarees and Ethnic Wear for Every Occasions</h1>
           <p>Explore silk sarees, women's collection, men's shirts, kidswear and fresh arrivals from a trusted textile store.</p>
         </div>
       </section>
