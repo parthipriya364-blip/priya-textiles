@@ -340,7 +340,11 @@ export default function OrderDetails() {
                 <div className="address-content">
                   <p><strong>{booking.customer.name}</strong></p>
                   <p>{booking.customer.address}</p>
-                  <p>{booking.customer.city}, {booking.customer.state}</p>
+                  <p>
+                    {booking.customer.city}
+                    {booking.customer.state && `, ${booking.customer.state}`}
+                  </p>
+                  <p>{booking.customer.country}</p>
                   <p>PIN: {booking.customer.pincode}</p>
                   <p>Phone: {booking.customer.phone}</p>
                   <p>Email: {booking.customer.email}</p>

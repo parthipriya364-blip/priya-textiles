@@ -267,8 +267,10 @@ export default function Orders() {
             
             <h4 style={{ marginTop: "20px" }}>Shipping Address</h4>
             <p>{viewOrder.customer.address}</p>
-            <p>{viewOrder.customer.city}, {viewOrder.customer.state}</p>
-            <p>PIN: {viewOrder.customer.pincode}</p>
+            <p><b>City:</b> {viewOrder.customer.city}</p>
+            {viewOrder.customer.state && <p><b>State:</b> {viewOrder.customer.state}</p>}
+            <p><b>Country:</b> {viewOrder.customer.country}</p>
+            <p><b>PIN:</b> {viewOrder.customer.pincode}</p>
             
             <h4 style={{ marginTop: "20px" }}>Order Items</h4>
             {viewOrder.items.map((item, index) => (
@@ -368,7 +370,10 @@ export default function Orders() {
             <p>{invoiceOrder.customer.email}</p>
             <p>{invoiceOrder.customer.phone}</p>
             <p>{invoiceOrder.customer.address}</p>
-            <p>{invoiceOrder.customer.city}, {invoiceOrder.customer.state} - {invoiceOrder.customer.pincode}</p>
+            <p><b>City:</b> {invoiceOrder.customer.city}</p>
+            {invoiceOrder.customer.state && <p><b>State:</b> {invoiceOrder.customer.state}</p>}
+            <p><b>Country:</b> {invoiceOrder.customer.country}</p>
+            <p><b>PIN:</b> {invoiceOrder.customer.pincode}</p>
             
             <h4 style={{ marginTop: "20px" }}>Items:</h4>
             {invoiceOrder.items.map((item, index) => (

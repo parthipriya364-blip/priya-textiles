@@ -238,8 +238,14 @@ export default function OrderHistory() {
                         <div className="delivery-info">
                           <p><strong>Delivery Address:</strong></p>
                           <p>{booking.customer.name}</p>
-                          <p>{booking.customer.address}, {booking.customer.city}</p>
-                          <p>{booking.customer.state} - {booking.customer.pincode}</p>
+                          <p>
+                            {booking.customer.address}, {booking.customer.city}
+                          </p>
+                          <p>
+                            {booking.customer.state ? `${booking.customer.state} - ` : ''}
+                            {booking.customer.pincode}
+                          </p>
+                          <p>{booking.customer.country}</p>
                           <p>Phone: {booking.customer.phone}</p>
                         </div>
                         <div className="order-actions">

@@ -83,9 +83,6 @@ export default function OrderDetails() {
   }
 
   const orderNumber = order._id.slice(-8).toUpperCase();
-  const address = [order.customer.address, order.customer.city, order.customer.state]
-    .filter(Boolean)
-    .join(", ");
 
   return (
     <div className="order-details-page">
@@ -168,8 +165,11 @@ export default function OrderDetails() {
           <h2>Shipping address</h2>
           <address>
             {order.customer.name}<br />
-            {address}<br />
-            PIN: {order.customer.pincode}
+            {order.customer.address}<br />
+            <strong>City:</strong> {order.customer.city}<br />
+            {order.customer.state && <><strong>State:</strong> {order.customer.state}<br /></>}
+            <strong>Country:</strong> {order.customer.country}<br />
+            <strong>PIN:</strong> {order.customer.pincode}
           </address>
         </section>
 
