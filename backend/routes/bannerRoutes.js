@@ -10,17 +10,17 @@ const {
   reorderBanner,
 } = require('../controller/bannerController');
 const { protect, authorize } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { uploadBannerImages } = require('../middleware/upload');
 
 // Public routes
 router.get('/', getBanners);
 router.get('/:id', getBanner);
 
 // Admin routes
-router.post('/', protect, authorize('admin'), upload.single('image'), createBanner);
+router.post('/', protect, authorize('admin'), uploadBannerImages, createBanner);
 router.put('/:id/toggle-enabled', protect, authorize('admin'), toggleEnabled);
 router.put('/:id/reorder', protect, authorize('admin'), reorderBanner);
-router.put('/:id', protect, authorize('admin'), upload.single('image'), updateBanner);
+router.put('/:id', protect, authorize('admin'), uploadBannerImages, updateBanner);
 router.delete('/:id', protect, authorize('admin'), deleteBanner);
 
 module.exports = router;

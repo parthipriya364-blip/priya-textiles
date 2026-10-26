@@ -36,13 +36,13 @@ export function BannerProvider({ children }) {
     [banners]
   );
 
-  const addBanner = async ({ image, link = "" }) => {
+  const addBanner = async ({ desktopImage, mobileImage, link = "" }) => {
     if (banners.length >= MAX_BANNERS) {
       return { ok: false, error: `Maximum of ${MAX_BANNERS} banners allowed.` };
     }
 
     try {
-      const data = await createBanner({ image, link });
+      const data = await createBanner({ desktopImage, mobileImage, link });
       setBanners((prev) => [...prev, data.banner]);
       showToast?.(data.message || 'Banner added successfully', 'success');
       return { ok: true };
@@ -53,11 +53,14 @@ export function BannerProvider({ children }) {
     }
   };
 
-  const replaceBanner = async (id, image) => {
+  const replaceBanner = async (id, image, imageType = 'desktop') => {
     try {
-      const data = await updateBanner(id, { image });
+      const updateData = imageType === 'desktop' 
+        ? { desktopImage: image } 
+        : { mobileImage: image };
+      const data = await updateBanner(id, updateData);
       setBanners((prev) => prev.map((b) => (b._id === id ? data.banner : b)));
-      showToast?.(data.message || 'Banner updated successfully', 'success');
+      showToast?.(data.message || `${imageType === 'desktop' ? 'Desktop' : 'Mobile'} image updated successfully`, 'success');
       return { ok: true };
     } catch (error) {
       const message = error.message || 'Failed to replace banner';

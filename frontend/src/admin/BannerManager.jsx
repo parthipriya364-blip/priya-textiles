@@ -33,29 +33,37 @@ export default function BannerManager() {
   const [previewBanner, setPreviewBanner] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const replaceInputRef = useRef(null);
+  const replaceDesktopInputRef = useRef(null);
+  const replaceMobileInputRef = useRef(null);
   const replaceTargetId = useRef(null);
+  const replaceImageType = useRef(null); // 'desktop' or 'mobile'
 
   const sorted = [...banners].sort((a, b) => a.order - b.order);
 
-  const handleReplaceClick = (id) => {
+  const handleReplaceClick = (id, imageType) => {
     replaceTargetId.current = id;
-    replaceInputRef.current?.click();
+    replaceImageType.current = imageType;
+    if (imageType === 'desktop') {
+      replaceDesktopInputRef.current?.click();
+    } else {
+      replaceMobileInputRef.current?.click();
+    }
   };
 
   const handleReplaceFile = async (e) => {
     const file = e.target.files?.[0];
-    if (file && replaceTargetId.current != null) {
+    if (file && replaceTargetId.current != null && replaceImageType.current != null) {
       if (!file.type.startsWith("image/")) {
         showToast("Please select an image file", "error");
       } else if (file.size > 5 * 1024 * 1024) {
         showToast("Image size must be less than 5MB", "error");
       } else {
-        await replaceBanner(replaceTargetId.current, file);
+        await replaceBanner(replaceTargetId.current, file, replaceImageType.current);
       }
     }
     e.target.value = "";
     replaceTargetId.current = null;
+    replaceImageType.current = null;
   };
 
   const confirmDelete = async () => {
@@ -88,7 +96,14 @@ export default function BannerManager() {
       />
 
       <input
-        ref={replaceInputRef}
+        ref={replaceDesktopInputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={handleReplaceFile}
+      />
+      <input
+        ref={replaceMobileInputRef}
         type="file"
         accept="image/*"
         hidden
@@ -101,8 +116,34 @@ export default function BannerManager() {
         <div className="banner-manager-list">
           {sorted.map((banner, i) => (
             <div className={`banner-manager-row ${banner.enabled ? "" : "disabled"}`} key={banner._id}>
-              <div className="banner-thumb">
-                <img src={banner.image?.url || banner.image} alt={banner.title || "Banner"} />
+              <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.25rem' }}>Desktop</div>
+                  <div className="banner-thumb">
+                    <img src={banner.image?.url || banner.image} alt="Desktop banner" />
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: '600', color: '#666', marginBottom: '0.25rem' }}>Mobile</div>
+                  <div className="banner-thumb">
+                    {banner.mobileImage?.url || banner.mobileImage ? (
+                      <img src={banner.mobileImage?.url || banner.mobileImage} alt="Mobile banner" />
+                    ) : (
+                      <div style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        background: '#f0f0f0',
+                        color: '#999',
+                        fontSize: '0.75rem'
+                      }}>
+                        No mobile image
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="banner-row-actions">
@@ -115,8 +156,11 @@ export default function BannerManager() {
                 >
                   <FaEdit /> Edit
                 </button>
-                <button className="admin-btn admin-btn-outline" onClick={() => handleReplaceClick(banner._id)}>
-                  <FaSyncAlt /> Replace Image
+                <button className="admin-btn admin-btn-outline" onClick={() => handleReplaceClick(banner._id, 'desktop')}>
+                  <FaSyncAlt /> Replace Desktop
+                </button>
+                <button className="admin-btn admin-btn-outline" onClick={() => handleReplaceClick(banner._id, 'mobile')}>
+                  <FaSyncAlt /> Replace Mobile
                 </button>
                 <button
                   className="row-action-btn"
@@ -171,7 +215,16 @@ export default function BannerManager() {
       >
         {previewBanner && (
           <div className="banner-preview-modal">
-            <img src={previewBanner.image?.url || previewBanner.image} alt="Banner" />
+            <div style={{ marginBottom: '1rem' }}>
+              <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Desktop</h4>
+              <img src={previewBanner.image?.url || previewBanner.image} alt="Desktop banner" style={{ width: '100%' }} />
+            </div>
+            {(previewBanner.mobileImage?.url || previewBanner.mobileImage) && (
+              <div>
+                <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>Mobile</h4>
+                <img src={previewBanner.mobileImage?.url || previewBanner.mobileImage} alt="Mobile banner" style={{ width: '100%' }} />
+              </div>
+            )}
           </div>
         )}
       </Modal>

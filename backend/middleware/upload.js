@@ -30,6 +30,13 @@ const uploadMultiple = upload.fields([
   { name: 'gallery', maxCount: 5 }
 ]);
 
+// Export banner images upload middleware (desktop and mobile)
+const uploadBannerImages = upload.fields([
+  { name: 'desktopImage', maxCount: 1 },
+  { name: 'mobileImage', maxCount: 1 }
+]);
+
 module.exports = upload;
 module.exports.uploadSingle = uploadSingle;
 module.exports.uploadMultiple = uploadMultiple;
+module.exports.uploadBannerImages = uploadBannerImages;

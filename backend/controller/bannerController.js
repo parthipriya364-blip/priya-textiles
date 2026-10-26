@@ -74,17 +74,21 @@ exports.createBanner = async (req, res) => {
       });
     }
 
-    // Check if image is uploaded
-    if (!req.file) {
+    // Check if both images are uploaded
+    if (!req.files || !req.files.desktopImage || !req.files.mobileImage) {
       return res.status(400).json({
         success: false,
-        message: 'Please upload a banner image',
+        message: 'Please upload both desktop and mobile banner images',
       });
     }
 
-    // Upload image to Cloudinary
-    const imageStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    const imageData = await uploadToCloudinary(imageStr, 'banners');
+    // Upload desktop image to Cloudinary
+    const desktopImageStr = `data:${req.files.desktopImage[0].mimetype};base64,${req.files.desktopImage[0].buffer.toString('base64')}`;
+    const desktopImageData = await uploadToCloudinary(desktopImageStr, 'banners');
+
+    // Upload mobile image to Cloudinary
+    const mobileImageStr = `data:${req.files.mobileImage[0].mimetype};base64,${req.files.mobileImage[0].buffer.toString('base64')}`;
+    const mobileImageData = await uploadToCloudinary(mobileImageStr, 'banners');
 
     // Get the next order number
     const maxOrderBanner = await Banner.findOne().sort({ order: -1 });
@@ -92,7 +96,8 @@ exports.createBanner = async (req, res) => {
 
     // Create banner
     const banner = await Banner.create({
-      image: imageData,
+      image: desktopImageData,
+      mobileImage: mobileImageData,
       link: link || null,
       order: nextOrder,
       enabled: true,
@@ -133,16 +138,27 @@ exports.updateBanner = async (req, res) => {
     if (link !== undefined) updateData.link = link || null;
     if (enabled !== undefined) updateData.enabled = enabled === 'true' || enabled === true;
 
-    // Update image if new one uploaded
-    if (req.file) {
-      // Upload new image
-      const imageStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    // Update desktop image if new one uploaded
+    if (req.files && req.files.desktopImage) {
+      const imageStr = `data:${req.files.desktopImage[0].mimetype};base64,${req.files.desktopImage[0].buffer.toString('base64')}`;
       const imageData = await uploadToCloudinary(imageStr, 'banners');
       updateData.image = imageData;
 
-      // Keep the existing image if the replacement upload fails.
+      // Delete old desktop image from Cloudinary
       if (banner.image?.public_id) {
         await deleteFromCloudinary(banner.image.public_id);
+      }
+    }
+
+    // Update mobile image if new one uploaded
+    if (req.files && req.files.mobileImage) {
+      const mobileImageStr = `data:${req.files.mobileImage[0].mimetype};base64,${req.files.mobileImage[0].buffer.toString('base64')}`;
+      const mobileImageData = await uploadToCloudinary(mobileImageStr, 'banners');
+      updateData.mobileImage = mobileImageData;
+
+      // Delete old mobile image from Cloudinary
+      if (banner.mobileImage?.public_id) {
+        await deleteFromCloudinary(banner.mobileImage.public_id);
       }
     }
 
@@ -180,8 +196,15 @@ exports.deleteBanner = async (req, res) => {
       });
     }
 
-    // Delete image from Cloudinary
-    await deleteFromCloudinary(banner.image.public_id);
+    // Delete desktop image from Cloudinary
+    if (banner.image?.public_id) {
+      await deleteFromCloudinary(banner.image.public_id);
+    }
+
+    // Delete mobile image from Cloudinary if it exists
+    if (banner.mobileImage?.public_id) {
+      await deleteFromCloudinary(banner.mobileImage.public_id);
+    }
 
     // Delete banner from database
     await banner.deleteOne();
