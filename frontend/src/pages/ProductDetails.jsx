@@ -414,10 +414,7 @@ export default function ProductDetails() {
             </div>
 
             <div className="pd-perks">
-              <span>
-                <FaTruck />
-                Free Shipping Available
-              </span>
+             
               <span>
                 <FaUndoAlt />
                 Damaged Product Return Only

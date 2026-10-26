@@ -72,14 +72,17 @@ export default function Checkout() {
     address: user?.address?.street || "",
     city: user?.address?.city || "",
     state: user?.address?.state || "",
+    country: user?.address?.country || "India",
     pincode: user?.address?.zipCode || "",
   });
 
   const [showOtherCityInput, setShowOtherCityInput] = useState(false);
+  const [showOtherStateInput, setShowOtherStateInput] = useState(false);
+  const [showOtherCountryInput, setShowOtherCountryInput] = useState(false);
 
-  // Calculate shipping dynamically based on city and state
+  // Calculate shipping dynamically based on city, state, and country
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = calculateShipping(customerData.city, customerData.state);
+  const shipping = calculateShipping(customerData.city, customerData.state, customerData.country);
   const total = subtotal + shipping;
 
   useEffect(() => {
@@ -175,14 +178,49 @@ export default function Checkout() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
+    // Handle country change - reset state and city when country changes
+    if (name === "country") {
+      if (value === "Other") {
+        setShowOtherCountryInput(true);
+        setCustomerData({
+          ...customerData,
+          country: "", // Clear country to allow manual input
+          state: "", // Reset state when country changes
+          city: "", // Reset city when country changes
+        });
+        setShowOtherStateInput(false);
+        setShowOtherCityInput(false);
+      } else {
+        setShowOtherCountryInput(false);
+        setCustomerData({
+          ...customerData,
+          country: value,
+          state: "", // Reset state when country changes
+          city: "", // Reset city when country changes
+        });
+        setShowOtherStateInput(false);
+        setShowOtherCityInput(false);
+      }
+    }
     // Handle state change - reset city when state changes
-    if (name === "state") {
-      setCustomerData({
-        ...customerData,
-        state: value,
-        city: "", // Reset city when state changes
-      });
-      setShowOtherCityInput(false); // Reset other city input
+    else if (name === "state") {
+      if (value === "Other") {
+        setShowOtherStateInput(true);
+        setCustomerData({
+          ...customerData,
+          state: "", // Clear state to allow manual input
+          city: "", // Reset city when state changes
+        });
+        setShowOtherCityInput(false);
+      } else {
+        setShowOtherStateInput(false);
+        setCustomerData({
+          ...customerData,
+          state: value,
+          city: "", // Reset city when state changes
+        });
+        setShowOtherCityInput(false);
+      }
     } 
     // Handle city change - check if "Other" is selected
     else if (name === "city") {
@@ -209,10 +247,17 @@ export default function Checkout() {
   };
 
   const validateForm = () => {
-    const { name, email, phone, address, city, state, pincode } = customerData;
+    const { name, email, phone, address, city, state, country, pincode } = customerData;
 
-    if (!name || !email || !phone || !address || !city || !state || !pincode) {
+    // Basic required fields for all customers
+    if (!name || !email || !phone || !address || !city || !country || !pincode) {
       showToast("Please fill in all required fields", "error");
+      return false;
+    }
+
+    // State is required only for India
+    if (country === "India" && !state) {
+      showToast("Please select or enter your state", "error");
       return false;
     }
 
@@ -512,15 +557,105 @@ export default function Checkout() {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="state">State *</label>
+                    <label htmlFor="country">Country *</label>
                     <select
-                      id="state"
-                      name="state"
-                      value={customerData.state}
+                      id="country"
+                      name="country"
+                      value={showOtherCountryInput ? "Other" : customerData.country}
                       onChange={handleInputChange}
-                      required
+                      required={!showOtherCountryInput}
                     >
-                      <option value="">Select State</option>
+                      <option value="">Select Country</option>
+                      <option value="India">India</option>
+                      <optgroup label="Popular Countries">
+                        <option value="United States">United States</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="United Arab Emirates">United Arab Emirates</option>
+                        <option value="Saudi Arabia">Saudi Arabia</option>
+                        <option value="Qatar">Qatar</option>
+                        <option value="Kuwait">Kuwait</option>
+                        <option value="Oman">Oman</option>
+                        <option value="Bahrain">Bahrain</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="Malaysia">Malaysia</option>
+                      </optgroup>
+                      <optgroup label="Europe">
+                        <option value="Germany">Germany</option>
+                        <option value="France">France</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Netherlands">Netherlands</option>
+                        <option value="Switzerland">Switzerland</option>
+                        <option value="Belgium">Belgium</option>
+                        <option value="Sweden">Sweden</option>
+                        <option value="Norway">Norway</option>
+                        <option value="Denmark">Denmark</option>
+                        <option value="Ireland">Ireland</option>
+                        <option value="Portugal">Portugal</option>
+                      </optgroup>
+                      <optgroup label="Asia Pacific">
+                        <option value="Japan">Japan</option>
+                        <option value="South Korea">South Korea</option>
+                        <option value="China">China</option>
+                        <option value="Hong Kong">Hong Kong</option>
+                        <option value="Thailand">Thailand</option>
+                        <option value="Indonesia">Indonesia</option>
+                        <option value="Philippines">Philippines</option>
+                        <option value="Vietnam">Vietnam</option>
+                        <option value="New Zealand">New Zealand</option>
+                      </optgroup>
+                      <optgroup label="South Asia">
+                        <option value="Pakistan">Pakistan</option>
+                        <option value="Bangladesh">Bangladesh</option>
+                        <option value="Sri Lanka">Sri Lanka</option>
+                        <option value="Nepal">Nepal</option>
+                        <option value="Maldives">Maldives</option>
+                      </optgroup>
+                      <optgroup label="Africa">
+                        <option value="South Africa">South Africa</option>
+                        <option value="Nigeria">Nigeria</option>
+                        <option value="Kenya">Kenya</option>
+                        <option value="Egypt">Egypt</option>
+                        <option value="Morocco">Morocco</option>
+                      </optgroup>
+                      <optgroup label="Americas">
+                        <option value="Mexico">Mexico</option>
+                        <option value="Brazil">Brazil</option>
+                        <option value="Argentina">Argentina</option>
+                        <option value="Chile">Chile</option>
+                      </optgroup>
+                      <option value="Other">Other (Enter manually - Free Shipping)</option>
+                    </select>
+                    {showOtherCountryInput && (
+                      <input
+                        type="text"
+                        id="country-other"
+                        name="country"
+                        value={customerData.country}
+                        onChange={handleInputChange}
+                        placeholder="Enter your country name"
+                        required
+                        style={{ marginTop: "10px" }}
+                      />
+                    )}
+                  </div>
+
+                  {/* State field - Only show for India */}
+                  {customerData.country === "India" && (
+                  <div className="form-group">
+                    <label htmlFor="state">State *</label>
+                    {customerData.country === "India" ? (
+                      <>
+                        <select
+                          id="state"
+                          name="state"
+                          value={showOtherStateInput ? "Other" : customerData.state}
+                          onChange={handleInputChange}
+                          required={!showOtherStateInput}
+                        >
+                          <option value="">Select State</option>
                       <optgroup label="Tamil Nadu">
                         <option value="Tamil Nadu">Tamil Nadu (₹40)</option>
                       </optgroup>
@@ -564,14 +699,40 @@ export default function Checkout() {
                         <option value="Mizoram">Mizoram</option>
                         <option value="Nagaland">Nagaland</option>
                         <option value="Tripura">Tripura</option>
-                        <option value="Other">Other</option>
+                        <option value="Other">Other (Enter manually)</option>
                       </optgroup>
                     </select>
+                    {showOtherStateInput && (
+                      <input
+                        type="text"
+                        id="state-other"
+                        name="state"
+                        value={customerData.state}
+                        onChange={handleInputChange}
+                        placeholder="Enter your state name"
+                        required
+                        style={{ marginTop: "10px" }}
+                      />
+                    )}
+                      </>
+                    ) : (
+                      <input
+                        type="text"
+                        id="state"
+                        name="state"
+                        value={customerData.state}
+                        onChange={handleInputChange}
+                        placeholder="Enter State/Province"
+                        required
+                      />
+                    )}
                   </div>
+                  )}
 
                   <div className="form-group">
                     <label htmlFor="city">City / District *</label>
-                    {customerData.state === "Tamil Nadu" ? (
+                    {customerData.country === "India" ? (
+                      customerData.state === "Tamil Nadu" ? (
                       <>
                         <select
                           id="city"
@@ -1578,6 +1739,17 @@ export default function Checkout() {
                         placeholder="Enter City"
                         required
                       />
+                    )
+                    ) : (
+                      <input
+                        type="text"
+                        id="city"
+                        name="city"
+                        value={customerData.city}
+                        onChange={handleInputChange}
+                        placeholder="Enter City"
+                        required
+                      />
                     )}
                   </div>
 
@@ -1599,11 +1771,14 @@ export default function Checkout() {
                 {/* Shipping charge indicator */}
                 <div className="shipping-info">
                   <p>
-                    📦 Shipping Charge: <strong>₹{shipping}</strong>
-                    {customerData.state === "Tamil Nadu" && customerData.city && (
+                    📦 Shipping Charge: <strong>{shipping === 0 ? "FREE" : `₹${shipping}`}</strong>
+                    {customerData.country && customerData.country !== "India" && (
+                      <span className="shipping-note"> ( International- Based on location)</span>
+                    )}
+                    {customerData.country === "India" && customerData.state === "Tamil Nadu" && customerData.city && (
                       <span className="shipping-note"> (Tamil Nadu)</span>
                     )}
-                    {(customerData.state === "Kerala" || 
+                    {customerData.country === "India" && (customerData.state === "Kerala" || 
                       customerData.state === "Karnataka" || 
                       customerData.state === "Andhra Pradesh" || 
                       customerData.state === "Telangana" || 
@@ -1611,7 +1786,7 @@ export default function Checkout() {
                       customerData.state === "Lakshadweep") && customerData.city && (
                       <span className="shipping-note"> (South India)</span>
                     )}
-                    {(customerData.state === "Delhi" || 
+                    {customerData.country === "India" && (customerData.state === "Delhi" || 
                       customerData.state === "Uttar Pradesh" || 
                       customerData.state === "Rajasthan" || 
                       customerData.state === "Punjab" || 
@@ -1623,7 +1798,7 @@ export default function Checkout() {
                       customerData.state === "Chandigarh") && customerData.city && (
                       <span className="shipping-note"> (North India)</span>
                     )}
-                    {(customerData.state === "Maharashtra" || 
+                    {customerData.country === "India" && (customerData.state === "Maharashtra" || 
                       customerData.state === "Gujarat" || 
                       customerData.state === "Goa" || 
                       customerData.state === "Dadra and Nagar Haveli and Daman and Diu" || 
@@ -1735,6 +1910,23 @@ export default function Checkout() {
                   </div>
                 ))}
               </div>
+
+              {/* Shipping Address Preview */}
+              {customerData.name && customerData.address && customerData.city && customerData.country && (
+                <div className="summary-address">
+                  <h3>Shipping Address</h3>
+                  <div className="address-preview">
+                    <p><strong>{customerData.name}</strong></p>
+                    <p>{customerData.address}</p>
+                    <p>
+                      {customerData.city}
+                      {customerData.country === "India" && customerData.state && `, ${customerData.state}`}
+                    </p>
+                    <p>{customerData.country}</p>
+                    {customerData.pincode && <p>PIN: {customerData.pincode}</p>}
+                  </div>
+                </div>
+              )}
 
               <div className="summary-totals">
                 <div className="summary-row">

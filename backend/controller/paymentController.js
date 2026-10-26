@@ -22,8 +22,14 @@ const getTrustedBookingData = async (bookingData) => {
   }
 
   const customer = bookingData.customer;
-  if (!customer || ['name', 'email', 'phone', 'address', 'city', 'state', 'pincode'].some((field) => !customer[field])) {
+  if (!customer || ['name', 'email', 'phone', 'address', 'city', 'pincode'].some((field) => !customer[field])) {
     throw Object.assign(new Error('Complete customer information is required'), { statusCode: 400 });
+  }
+  
+  // State is required only for India
+  const country = customer.country?.toLowerCase().trim() || 'india';
+  if (country === 'india' && !customer.state) {
+    throw Object.assign(new Error('State is required for Indian orders'), { statusCode: 400 });
   }
 
   const itemQuantities = bookingData.items.map((item) => {
@@ -67,12 +73,16 @@ const getTrustedBookingData = async (bookingData) => {
   });
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
-  // Calculate shipping based on customer's state
+  // Calculate shipping based on customer's country and state
   const state = customer.state?.toLowerCase().trim();
-  let shipping = 200; // Default for other states
+  let shipping = 200; // Default for other Indian states
   
+  // International orders - FREE shipping
+  if (country !== 'india') {
+    shipping = 0;
+  }
   // Tamil Nadu - ₹40
-  if (state === "tamil nadu" || state === "tamilnadu" || state === "tn") {
+  else if (state === "tamil nadu" || state === "tamilnadu" || state === "tn") {
     shipping = 40;
   }
   // South India - ₹90 (Kerala, Karnataka, Andhra Pradesh, Telangana, Puducherry, Lakshadweep)
@@ -106,9 +116,15 @@ const getTrustedBookingData = async (bookingData) => {
   // Chhattisgarh, Madhya Pradesh, Andaman and Nicobar Islands, Bihar, Jharkhand,
   // Odisha, West Bengal, Sikkim, Northeast states, etc.
 
+  // Clean up customer data - remove state if empty or for non-India orders
+  const cleanedCustomer = { ...bookingData.customer };
+  if (country !== 'india' || !cleanedCustomer.state || cleanedCustomer.state.trim() === '') {
+    delete cleanedCustomer.state;
+  }
+
   return {
     items,
-    customer: bookingData.customer,
+    customer: cleanedCustomer,
     subtotal,
     shipping,
     total: subtotal + shipping,
@@ -365,10 +381,19 @@ exports.createCODBooking = async (req, res) => {
       });
     }
 
-    if (!customer || !customer.name || !customer.email || !customer.phone || !customer.address || !customer.state) {
+    if (!customer || !customer.name || !customer.email || !customer.phone || !customer.address) {
       return res.status(400).json({
         success: false,
         message: 'Complete customer information is required',
+      });
+    }
+    
+    // State is required only for India
+    const country = customer.country?.toLowerCase().trim() || 'india';
+    if (country === 'india' && !customer.state) {
+      return res.status(400).json({
+        success: false,
+        message: 'State is required for Indian orders',
       });
     }
 
@@ -379,12 +404,16 @@ exports.createCODBooking = async (req, res) => {
       });
     }
 
-    // Calculate expected shipping based on state
+    // Calculate expected shipping based on country and state
     const state = customer.state?.toLowerCase().trim();
-    let expectedShipping = 200; // Default for other states
+    let expectedShipping = 200; // Default for other Indian states
     
+    // International orders - FREE shipping
+    if (country !== 'india') {
+      expectedShipping = 0;
+    }
     // Tamil Nadu - ₹40
-    if (state === "tamil nadu" || state === "tamilnadu" || state === "tn") {
+    else if (state === "tamil nadu" || state === "tamilnadu" || state === "tn") {
       expectedShipping = 40;
     }
     // South India - ₹90
@@ -453,11 +482,17 @@ exports.createCODBooking = async (req, res) => {
     console.log('   Shipping: ₹', trustedShipping);
     console.log('   Total: ₹', trustedTotal);
 
+    // Clean up customer data - remove state if empty or for non-India orders
+    const cleanedCustomer = { ...customer };
+    if (country !== 'india' || !cleanedCustomer.state || cleanedCustomer.state.trim() === '') {
+      delete cleanedCustomer.state;
+    }
+
     // Create booking (with user ID if authenticated)
     const booking = await Booking.create({
       user: req.user ? req.user.id : null,
       items,
-      customer,
+      customer: cleanedCustomer,
       subtotal: trustedSubtotal,
       shipping: trustedShipping,
       total: trustedTotal,

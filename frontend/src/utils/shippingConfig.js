@@ -495,15 +495,24 @@ export const SHIPPING_CHARGES = {
   SOUTH_INDIA: 90, // Kerala, Karnataka, Andhra Pradesh, Telangana, Puducherry, Lakshadweep
   NORTH_INDIA: 200, // Delhi, UP, Rajasthan, Punjab, Haryana, HP, Uttarakhand, J&K, Ladakh, Chandigarh
   OTHER_STATES: 200, // West India, Central India, East India, Northeast India: Maharashtra, Gujarat, Goa, Dadra & Nagar Haveli and Daman & Diu, Chhattisgarh, Madhya Pradesh, Andaman & Nicobar, Bihar, Jharkhand, Odisha, West Bengal, Sikkim, Arunachal Pradesh, Assam, Manipur, Meghalaya, Mizoram, Nagaland, Tripura
+  INTERNATIONAL: 0, // Free shipping for international orders (non-India)
 };
 
 /**
- * Calculate shipping charge based on city and state
+ * Calculate shipping charge based on city, state, and country
  * @param {string} city - City name
  * @param {string} state - State name
+ * @param {string} country - Country name (defaults to "India")
  * @returns {number} Shipping charge amount
  */
-export const calculateShipping = (city, state) => {
+export const calculateShipping = (city, state, country = "India") => {
+  // Free shipping for international orders (non-India)
+  const normalizedCountry = (country || "India").toLowerCase().trim();
+  if (normalizedCountry !== "india") {
+    return SHIPPING_CHARGES.INTERNATIONAL;
+  }
+
+  // For India, continue with existing state-based logic
   if (!state) {
     return SHIPPING_CHARGES.OTHER_STATES;
   }

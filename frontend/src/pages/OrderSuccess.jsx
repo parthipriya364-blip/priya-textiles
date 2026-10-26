@@ -97,7 +97,11 @@ export default function OrderSuccess() {
             <div className="address-details">
               <p><strong>{booking.customer.name}</strong></p>
               <p>{booking.customer.address}</p>
-              <p>{booking.customer.city}, {booking.customer.state} - {booking.customer.pincode}</p>
+              <p>
+                {booking.customer.city}
+                {booking.customer.state && `, ${booking.customer.state}`} - {booking.customer.pincode}
+              </p>
+              <p>{booking.customer.country}</p>
               <p>Phone: {booking.customer.phone}</p>
               <p>Email: {booking.customer.email}</p>
             </div>
