@@ -106,9 +106,9 @@
 /* Tablet Portrait & Large Mobile */
 @media (min-width: 577px) and (max-width: 767px) {
   .hero {
-    height: 380px;
-    min-height: 350px;
-    max-height: 420px;
+    height: 450px;
+    min-height: 1120px;
+    max-height: 1000px;
   }
 
   .hero .swiper-button-next,
@@ -131,9 +131,9 @@
 /* Mobile Portrait (Standard Phones) */
 @media (max-width: 576px) {
   .hero {
-    height: 320px;
-    min-height: 280px;
-    max-height: 350px;
+    height: 420px;
+    min-height: 380px;
+    max-height: 480px;
   }
 
   .hero .swiper-button-next,
@@ -156,9 +156,9 @@
 /* Small Mobile Devices */
 @media (max-width: 400px) {
   .hero {
-    height: 280px;
-    min-height: 250px;
-    max-height: 300px;
+    height: 380px;
+    min-height: 350px;
+    max-height: 420px;
   }
 
   .hero .swiper-button-next,
@@ -181,9 +181,9 @@
 /* Very Small Mobile (iPhone SE, etc.) */
 @media (max-width: 375px) {
   .hero {
-    height: 260px;
-    min-height: 240px;
-    max-height: 280px;
+    height: 360px;
+    min-height: 330px;
+    max-height: 400px;
   }
 }
 

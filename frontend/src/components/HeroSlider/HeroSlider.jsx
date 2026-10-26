@@ -23,9 +23,10 @@ export default function HeroSlider({ className = "" }) {
   const count = slides.length;
 
   // Track window size to determine which image to show
+  // Using 991px breakpoint to match tablet/mobile distinction
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 991);
     };
     
     checkMobile();
