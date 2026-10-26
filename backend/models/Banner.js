@@ -12,6 +12,16 @@ const bannerSchema = new mongoose.Schema(
         required: [true, 'Banner image public_id is required'],
       },
     },
+    mobileImage: {
+      url: {
+        type: String,
+        required: false,
+      },
+      public_id: {
+        type: String,
+        required: false,
+      },
+    },
     order: {
       type: Number,
       required: true,

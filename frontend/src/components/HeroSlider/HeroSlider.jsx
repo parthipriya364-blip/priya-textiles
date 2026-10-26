@@ -16,17 +16,35 @@ export default function HeroSlider({ className = "" }) {
   const { activeBanners } = useBanners();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const timerRef = useRef(null);
 
   const slides = activeBanners;
   const count = slides.length;
 
-  // Preload every slide image once so later transitions never show a blank
-  // frame, while still marking non-first images loading="lazy" in markup.
+  // Track window size to determine which image to show
+  // Using 991px breakpoint to match tablet/mobile distinction
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 991);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Preload every slide image (both desktop and mobile) once so later transitions 
+  // never show a blank frame, while still marking non-first images loading="lazy" in markup.
   useEffect(() => {
     slides.forEach((slide) => {
-      const img = new Image();
-      img.src = slide.image;
+      const desktopImg = new Image();
+      desktopImg.src = slide.image?.url || slide.image;
+      
+      if (slide.mobileImage?.url || slide.mobileImage) {
+        const mobileImg = new Image();
+        mobileImg.src = slide.mobileImage?.url || slide.mobileImage;
+      }
     });
   }, [slides]);
 
@@ -63,22 +81,29 @@ export default function HeroSlider({ className = "" }) {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {slides.map((slide, i) => (
-        <Fragment key={slide._id || slide.id}>
-          <img
-          src={slide.image?.url || slide.image}
-          alt={`${slide.title || "PRIYA TEXTILES collection"} banner`}
-          className={`hero-slide ${i === index ? "active" : ""}`}
-          loading={i === 0 ? "eager" : "lazy"}
-          fetchpriority={i === 0 ? "high" : "auto"}
-          decoding="async"
-          onError={(e) => {
-            console.error(`Failed to load banner image: ${slide.image?.url || slide.image}`);
-            e.target.style.display = 'none'; // Hide broken images
-          }}
-          />
-        </Fragment>
-      ))}
+      {slides.map((slide, i) => {
+        // Select appropriate image based on viewport
+        const imageSrc = isMobile 
+          ? (slide.mobileImage?.url || slide.mobileImage || slide.image?.url || slide.image)
+          : (slide.image?.url || slide.image);
+        
+        return (
+          <Fragment key={slide._id || slide.id}>
+            <img
+              src={imageSrc}
+              alt={`${slide.title || "PRIYA TEXTILES collection"} banner`}
+              className={`hero-slide ${i === index ? "active" : ""}`}
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchpriority={i === 0 ? "high" : "auto"}
+              decoding="async"
+              onError={(e) => {
+                console.error(`Failed to load banner image: ${imageSrc}`);
+                e.target.style.display = 'none'; // Hide broken images
+              }}
+            />
+          </Fragment>
+        );
+      })}
 
       {count > 1 && (
         <>

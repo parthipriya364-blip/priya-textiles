@@ -39,7 +39,8 @@ export const createBanner = async (bannerData) => {
     const formData = new FormData();
     
     if (bannerData.link) formData.append('link', bannerData.link);
-    if (bannerData.image) formData.append('image', bannerData.image);
+    if (bannerData.desktopImage) formData.append('desktopImage', bannerData.desktopImage);
+    if (bannerData.mobileImage) formData.append('mobileImage', bannerData.mobileImage);
 
     const response = await axios.post(API_URL, formData, {
       ...getAuthHeaders(),
@@ -63,7 +64,8 @@ export const updateBanner = async (id, bannerData) => {
     
     if (bannerData.link !== undefined) formData.append('link', bannerData.link);
     if (bannerData.enabled !== undefined) formData.append('enabled', bannerData.enabled);
-    if (bannerData.image) formData.append('image', bannerData.image);
+    if (bannerData.desktopImage) formData.append('desktopImage', bannerData.desktopImage);
+    if (bannerData.mobileImage) formData.append('mobileImage', bannerData.mobileImage);
 
     const response = await axios.put(`${API_URL}/${id}`, formData, {
       ...getAuthHeaders(),
