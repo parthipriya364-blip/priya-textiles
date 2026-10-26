@@ -320,6 +320,26 @@
   .brand img { width: 36px; height: 36px; }
   .brand-text strong { font-size: 17px; }
   .header-icons { gap: 13px; }
+  
+  /* Hide Login text, show only icon on mobile */
+  .login-btn span {
+    display: none;
+  }
+  
+  .login-btn {
+    padding: 6px;
+    min-width: auto;
+  }
+  
+  /* Hide profile name, show only icon on mobile */
+  .profile-name {
+    display: none;
+  }
+  
+  .profile-btn {
+    padding: 6px;
+    min-width: auto;
+  }
 }
 
 /* Theme Toggle Button */
