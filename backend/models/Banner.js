@@ -15,11 +15,11 @@ const bannerSchema = new mongoose.Schema(
     mobileImage: {
       url: {
         type: String,
-        required: [true, 'Mobile banner image URL is required'],
+        required: false,
       },
       public_id: {
         type: String,
-        required: [true, 'Mobile banner image public_id is required'],
+        required: false,
       },
     },
     order: {
