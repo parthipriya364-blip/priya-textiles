@@ -90,3 +90,58 @@
 }
 
 .mobile-menu-footer a:hover { color: var(--c-maroon); }
+
+/* Dark Mode for Mobile Menu */
+[data-theme="dark"] .mobile-menu-panel {
+  background: #1a1a1a;
+  border-right: 1px solid #3a3a3a;
+}
+
+[data-theme="dark"] .mobile-menu-top {
+  border-bottom-color: #3a3a3a;
+}
+
+[data-theme="dark"] .mobile-menu-top button {
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .mobile-menu-top .brand-text strong {
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .mobile-menu-top .brand-text em {
+  color: #d4af37;
+}
+
+[data-theme="dark"] .mobile-menu-links a {
+  color: #9ca3af;
+  border-bottom-color: #2a2a2a;
+}
+
+[data-theme="dark"] .mobile-menu-links a.active {
+  color: #d4af37;
+}
+
+[data-theme="dark"] .mobile-menu-links a:hover {
+  color: #d4af37;
+}
+
+[data-theme="dark"] .mobile-menu-footer {
+  border-top-color: #3a3a3a;
+}
+
+[data-theme="dark"] .mobile-menu-footer a {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .mobile-menu-footer a:hover {
+  color: #d4af37;
+}
+
+[data-theme="dark"] .hamburger {
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .hamburger:hover {
+  color: #d4af37;
+}

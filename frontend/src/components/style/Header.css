@@ -34,6 +34,17 @@
   border: none;
   font-size: 20px;
   color: var(--c-black);
+  cursor: pointer;
+  padding: 8px;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.hamburger:hover {
+  color: var(--c-maroon);
+}
+
+.hamburger:active {
+  transform: scale(0.95);
 }
 
 .brand {
@@ -311,15 +322,79 @@
 }
 
 @media (max-width: 1080px) {
-  .main-nav { display: none; }
-  .hamburger { display: flex; }
+  .main-nav { 
+    display: none; 
+  }
+  
+  .hamburger { 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Ensure hamburger is visible on mobile */
+  .hamburger {
+    display: flex;
+    font-size: 22px;
+  }
+  
+  /* Hide profile name on mobile, show only icon */
+  .profile-name {
+    display: none;
+  }
+  
+  .profile-btn {
+    padding: 6px;
+  }
+  
+  /* Hide login text on mobile, show only icon */
+  .login-btn span {
+    display: none;
+  }
+  
+  .login-btn {
+    padding: 8px;
+  }
 }
 
 @media (max-width: 480px) {
-  .site-header-inner { padding: 14px 18px; gap: 16px; }
-  .brand img { width: 36px; height: 36px; }
-  .brand-text strong { font-size: 17px; }
-  .header-icons { gap: 13px; }
+  .site-header-inner { 
+    padding: 14px 18px; 
+    gap: 16px; 
+  }
+  
+  .brand img { 
+    width: 36px; 
+    height: 36px; 
+  }
+  
+  .brand-text strong { 
+    font-size: 17px; 
+  }
+  
+  .brand-text em {
+    font-size: 11px;
+  }
+  
+  .header-icons { 
+    gap: 13px; 
+  }
+  
+  /* Further reduce icon sizes on very small screens */
+  .header-icons > button,
+  .icon-link {
+    font-size: 16px;
+  }
+  
+  .profile-icon {
+    font-size: 20px;
+  }
+  
+  .hamburger {
+    font-size: 20px;
+  }
 }
 
 /* Theme Toggle Button */

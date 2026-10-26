@@ -40,11 +40,12 @@
   }
 }
 
-/* Mobile - Fill entire screen without black bars */
-@media (max-width: 767px) {
+/* Mobile - Fill entire screen, position to avoid header overlap */
+@media (max-width: 1000px) {
   .hero-slide {
     object-fit: cover;
-    object-position: center center;
+    /* Position image slightly lower to avoid navbar covering important content */
+    object-position: center 47%;
   }
 }
 
