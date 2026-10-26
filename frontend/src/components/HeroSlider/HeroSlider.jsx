@@ -72,6 +72,10 @@ export default function HeroSlider({ className = "" }) {
           loading={i === 0 ? "eager" : "lazy"}
           fetchpriority={i === 0 ? "high" : "auto"}
           decoding="async"
+          onError={(e) => {
+            console.error(`Failed to load banner image: ${slide.image?.url || slide.image}`);
+            e.target.style.display = 'none'; // Hide broken images
+          }}
           />
         </Fragment>
       ))}
