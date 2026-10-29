@@ -21,6 +21,12 @@ const bookingSchema = new mongoose.Schema({
     state: { type: String, trim: true },
     pincode: { type: String, required: true, trim: true },
     country: { type: String, required: true, trim: true, default: 'India' },
+    // Google Maps location coordinates
+    location: {
+      lat: { type: Number },
+      lng: { type: Number },
+      formattedAddress: { type: String }
+    }
   },
   subtotal: { type: Number, required: true, min: 0 },
   shipping: { type: Number, required: true, min: 0 },

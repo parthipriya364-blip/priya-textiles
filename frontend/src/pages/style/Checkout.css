@@ -642,3 +642,78 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* Google Maps Location Picker Styles */
+.map-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 15px;
+}
+
+.map-section-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--c-text, #333);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-toggle-map {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-toggle-map:hover {
+  background: #1976D2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.btn-toggle-map svg {
+  font-size: 1.1rem;
+}
+
+/* Mobile responsive for map section */
+@media (max-width: 768px) {
+  .map-section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .map-section-header h2 {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .btn-toggle-map {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-section-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .btn-toggle-map {
+    font-size: 0.9rem;
+    padding: 10px 16px;
+  }
+}

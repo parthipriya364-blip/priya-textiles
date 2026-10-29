@@ -9,7 +9,8 @@ import {
   verifyAndCreateBooking,
   createCODBooking,
 } from "../services/paymentService";
-import { FaCreditCard, FaMobileAlt, FaMoneyBillWave, FaLock } from "react-icons/fa";
+import { FaCreditCard, FaMobileAlt, FaMoneyBillWave, FaLock, FaMapMarkedAlt } from "react-icons/fa";
+import LocationPicker from "../components/LocationPicker";
 import { 
   TAMIL_NADU_DISTRICTS, 
   KERALA_DISTRICTS,
@@ -79,6 +80,11 @@ export default function Checkout() {
   const [showOtherCityInput, setShowOtherCityInput] = useState(false);
   const [showOtherStateInput, setShowOtherStateInput] = useState(false);
   const [showOtherCountryInput, setShowOtherCountryInput] = useState(false);
+
+  // Location picker state
+  const [showMap, setShowMap] = useState(false);
+  const [locationData, setLocationData] = useState(null);
+
 
   // Calculate shipping dynamically based on city, state, and country
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -246,6 +252,21 @@ export default function Checkout() {
     }
   };
 
+  // Handle location selection from Google Maps
+  const handleLocationSelect = (location) => {
+    setLocationData(location);
+    setCustomerData({
+      ...customerData,
+      address: location.address,
+      city: location.city,
+      state: location.state,
+      country: location.country,
+      pincode: location.pincode,
+    });
+    // Optionally close map after selection
+    // setShowMap(false);
+  };
+
   const validateForm = () => {
     const { name, email, phone, address, city, state, country, pincode } = customerData;
 
@@ -335,7 +356,15 @@ export default function Checkout() {
           quantity: item.qty,
           size: item.size || "Free Size",
         })),
-        customer: customerData,
+        customer: {
+          ...customerData,
+          // Include Google Maps location if available
+          location: locationData ? {
+            lat: locationData.lat,
+            lng: locationData.lng,
+            formattedAddress: locationData.formattedAddress
+          } : undefined
+        },
         subtotal,
         shipping,
         total,
@@ -446,7 +475,15 @@ export default function Checkout() {
           quantity: item.qty,
           size: item.size || "Free Size",
         })),
-        customer: customerData,
+        customer: {
+          ...customerData,
+          // Include Google Maps location if available
+          location: locationData ? {
+            lat: locationData.lat,
+            lng: locationData.lng,
+            formattedAddress: locationData.formattedAddress
+          } : undefined
+        },
         subtotal,
         shipping,
         total,
@@ -538,6 +575,29 @@ export default function Checkout() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Google Maps Location Picker */}
+              <div className="form-section">
+                <div className="map-section-header">
+                  <h2>📍 Delivery Location</h2>
+                  <button
+                    type="button"
+                    onClick={() => setShowMap(!showMap)}
+                    className="btn-toggle-map"
+                  >
+                    <FaMapMarkedAlt />
+                    {showMap ? 'Hide Map' : 'Choose on Map'}
+                  </button>
+                </div>
+
+                {showMap && (
+                  <LocationPicker
+                    onLocationSelect={handleLocationSelect}
+                    initialLocation={locationData}
+                    onClose={() => setShowMap(false)}
+                  />
+                )}
               </div>
 
               <div className="form-section">

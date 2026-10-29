@@ -97,18 +97,27 @@ export default function Contact() {
           </form>
         </div>
 
-        {/* Store location — free Google Maps embed, no API key required.
-           Replace the `src` query below with your exact store address
-           or a Google Maps "Embed a map" share link for pinpoint accuracy. */}
+        {/* Store location with OpenStreetMap embed - free, no API key required */}
         <div className="container contact-map-wrap">
           <iframe
             className="contact-map"
             title="Priya Textiles Store Location"
-            src="https://www.google.com/maps?q=142+Textile+Lane,+R.S.+Puram,+Coimbatore,+Tamil+Nadu+641002&output=embed"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=78.1410,11.6520,78.1460,11.6570&layer=mapnik&marker=11.6545,78.1435"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
           />
+          <br />
+          <small>
+            <a 
+              href="https://www.openstreetmap.org/?mlat=11.6545&mlon=78.1435#map=15/11.6545/78.1435" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ color: '#8B0000' }}
+            >
+              View Larger Map
+            </a>
+          </small>
         </div>
       </section>
     </div>

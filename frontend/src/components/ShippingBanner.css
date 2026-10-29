@@ -1,0 +1,116 @@
+.shipping-banner {
+  background-color: #ebeae6;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.shipping-banner-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.banner-title {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #5c4033;
+  letter-spacing: 0.1em;
+  margin: 0 0 1rem 0;
+  font-family: 'Georgia', serif;
+}
+
+.banner-tagline {
+  font-size: 1.5rem;
+  color: #8b6f47;
+  margin: 0 0 2rem 0;
+  font-weight: 300;
+}
+
+.banner-divider {
+  height: 3px;
+  background-color: #b8956a;
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.shipping-badge {
+  background-color: #6d4c3d;
+  color: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.globe-icon {
+  font-size: 2.5rem;
+}
+
+.shipping-text {
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.banner-subtitle {
+  font-size: 1.3rem;
+  color: #8b6f47;
+  margin: 1.5rem 0 0 0;
+  font-weight: 300;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .shipping-banner {
+    padding: 2rem 1rem;
+  }
+
+  .banner-title {
+    font-size: 2rem;
+  }
+
+  .banner-tagline {
+    font-size: 1.1rem;
+  }
+
+  .shipping-badge {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.2rem 1.5rem;
+  }
+
+  .globe-icon {
+    font-size: 2rem;
+  }
+
+  .shipping-text {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .banner-subtitle {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-title {
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .banner-tagline {
+    font-size: 1rem;
+  }
+
+  .shipping-text {
+    font-size: 0.95rem;
+  }
+
+  .banner-subtitle {
+    font-size: 0.9rem;
+  }
+}

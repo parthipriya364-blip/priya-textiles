@@ -1,4 +1,5 @@
 import Hero from "../components/Hero";
+import ShippingBanner from "../components/ShippingBanner";
 import Categories from "../components/Categories";
 import NewArrivals from "../components/NewArrivals";
 import WhyChooseUs from "../components/WhyChooseUs";
@@ -44,12 +45,7 @@ export default function Home() {
         ]}
       />
       <Hero />
-      <section className="section home-intro">
-        <div className="container section-title">
-          <h1>PRIYA TEXTILES: Sarees and Ethnic Wear for Every Occasions</h1>
-          <p>Explore silk sarees, women's collection, men's shirts, kidswear and fresh arrivals from a trusted textile store.</p>
-        </div>
-      </section>
+      <ShippingBanner />
       <Categories />
       <NewArrivals />
       <WhyChooseUs />
