@@ -1833,7 +1833,7 @@ export default function Checkout() {
                   <p>
                     📦 Shipping Charge: <strong>{shipping === 0 ? "FREE" : `₹${shipping}`}</strong>
                     {customerData.country && customerData.country !== "India" && (
-                      <span className="shipping-note"> ( International- Based on location)</span>
+                      <span className="shipping-note"> ( International- Including shipping amount)</span>
                     )}
                     {customerData.country === "India" && customerData.state === "Tamil Nadu" && customerData.city && (
                       <span className="shipping-note"> (Tamil Nadu)</span>
