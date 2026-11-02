@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { FaFilter, FaSpinner } from "react-icons/fa";
-import PageHeader from "../components/PageHeader";
+import CollectionBanner from "../components/CollectionBanner";
 import ProductGrid from "../components/ProductGrid";
 import { getProducts } from "../services/productService";
 import { getCategories } from "../services/categoryService";
@@ -17,7 +17,7 @@ const SORTS = {
 
 const CATEGORY_SEO = {
   women: {
-    title: "Women's Collection | Sarees & Ethnic Wear",
+    title: "Women's Collection ",
     description: "Shop women's sarees, silk sarees, kurtis, lehengas and elegant ethnic wear at PRIYA TEXTILES.",
   },
   men: {
@@ -120,11 +120,13 @@ export default function CollectionPage({
           { name: titleOverride || categoryData.name, path: `/${publicPath}` },
         ])}
       />
-      <PageHeader
-        eyebrow="Collection"
-        title={titleOverride || `${categoryData.name}'s Collection`}
+      <CollectionBanner
+        eyebrow="EXPLORE OUR COLLECTION"
+        title={titleOverride || `${categoryData.name}'s Fashion`}
         subtitle={seoDescription}
-        crumbs={[{ label: `${categoryData.name}'s Collection` }]}
+        crumbs={[{ label: `${categoryData.name}'s Fashion` }]}
+        useImageBanner={true}
+        backgroundImage={categoryData.image || "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200"}
       />
 
       {belowHeader}
