@@ -224,8 +224,8 @@ export default function LocationPicker({ onLocationSelect, initialLocation, onCl
     setSearchLoading(true);
     try {
       const results = await searchLocation(query, { 
-        limit: 5,
-        countrycodes: 'in' // Focus on India
+        limit: 5
+        // Removed countrycodes restriction - now searches worldwide
       });
       setSearchResults(results);
       setShowSearchResults(true);

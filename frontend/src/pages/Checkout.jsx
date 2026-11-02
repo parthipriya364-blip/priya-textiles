@@ -1831,9 +1831,9 @@ export default function Checkout() {
                 {/* Shipping charge indicator */}
                 <div className="shipping-info">
                   <p>
-                    📦 Shipping Charge: <strong>{shipping === 0 ? "FREE" : `₹${shipping}`}</strong>
+                    📦 Shipping Charge: <strong>{shipping === 0 ? "" : `₹${shipping}`}</strong>
                     {customerData.country && customerData.country !== "India" && (
-                      <span className="shipping-note"> ( International- Including shipping amount)</span>
+                      <span className="shipping-note"> ( International- contact us for shipping costs)</span>
                     )}
                     {customerData.country === "India" && customerData.state === "Tamil Nadu" && customerData.city && (
                       <span className="shipping-note"> (Tamil Nadu)</span>
@@ -1995,7 +1995,7 @@ export default function Checkout() {
                 </div>
                 <div className="summary-row">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? "FREE" : `₹${shipping.toFixed(2)}`}</span>
+                  <span>{shipping === 0 ? "" : `₹${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="summary-row total">
                   <span>Total</span>

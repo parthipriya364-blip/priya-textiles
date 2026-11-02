@@ -41,7 +41,9 @@ export async function searchLocation(query, options = {}) {
       format: 'jsonv2',
       addressdetails: '1',
       limit: options.limit || '5',
-      countrycodes: options.countrycodes || 'in', // Default to India
+      // Allow worldwide search - no country restriction by default
+      // Optionally pass countrycodes in options to restrict to specific countries
+      ...(options.countrycodes ? { countrycodes: options.countrycodes } : {}),
       ...options
     });
 
@@ -125,7 +127,7 @@ export async function reverseGeocode(lat, lng, options = {}) {
       address: buildAddress(address),
       city: extractCity(address),
       state: extractState(address),
-      country: address.country || 'India',
+      country: address.country || '',
       pincode: address.postcode || '',
       addressComponents: address,
       locationType: data.type,
