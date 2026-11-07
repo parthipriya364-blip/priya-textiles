@@ -37,40 +37,75 @@
 }
 
 .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
+  text-decoration: none;
 }
 
 .brand img {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   object-fit: cover;
   border-radius: 50%;
   border: 1px solid var(--c-gold-light);
+  flex-shrink: 0;
 }
 
+/* Updated Brand Text matching the Priya TEXTILES logo design */
 .brand-text {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
-  line-height: 1.1;
+  align-items: flex-start;
+  line-height: 1;
 }
 
+.brand-primary-wrap {
+  display: inline-flex;
+  align-items: flex-end;
+  position: relative;
+}
+
+/* Deep Crimson Red Serif "Priya" */
 .brand-text strong {
-  font-family: var(--f-display);
-  font-size: 20px;
-  color: var(--c-maroon);
-  letter-spacing: 0.5px;
+  font-family: "Georgia", "Times New Roman", var(--f-display), serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  line-height: 0.95;
+  background: linear-gradient(180deg, #b80d18 0%, #80050d 65%, #560207 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #9e0b14;
 }
 
+/* Golden Leaf & Wave Flourish on the right of "Priya" */
+.brand-gold-flourish {
+  width: 44px;
+  height: 27px;
+  margin-left: 1px;
+  margin-bottom: -2px;
+  flex-shrink: 0;
+}
+
+/* Metallic Gold Serif "TEXTILES" with subtle dark outline shadow for light & dark headers */
 .brand-text em {
-  font-family: var(--f-accent);
-  font-style: italic;
-  font-size: 13px;
-  color: #8f6f22;
-  letter-spacing: 3px;
+  font-family: "Georgia", "Times New Roman", var(--f-accent), serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 4.5px;
   text-transform: uppercase;
+  margin-top: 4px;
+  padding-left: 2px;
+  background: linear-gradient(180deg, #f7c948 0%, #d49015 55%, #8c5604 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #d49015;
+  filter: drop-shadow(0px 0.4px 0.4px rgba(0, 0, 0, 0.35));
 }
 
 .main-nav {
@@ -94,6 +129,7 @@
   content: '';
   position: absolute;
   left: 0;
+  top: auto;
   bottom: 0;
   width: 0;
   height: 1.5px;
@@ -318,7 +354,9 @@
 @media (max-width: 480px) {
   .site-header-inner { padding: 14px 18px; gap: 16px; }
   .brand img { width: 36px; height: 36px; }
-  .brand-text strong { font-size: 17px; }
+  .brand-text strong { font-size: 22px; }
+  .brand-gold-flourish { width: 34px; height: 21px; }
+  .brand-text em { font-size: 9.5px; letter-spacing: 3.5px; margin-top: 3px; }
   .header-icons { gap: 13px; }
   
   /* Hide Login text, show only icon on mobile */
@@ -394,9 +432,19 @@
   background: #2a2a1a;
 }
 
-[data-theme="dark"] .brand-text strong,
+/* Preserve the Red & Gold gradient logo text in Dark Mode */
+[data-theme="dark"] .brand-text strong {
+  background: linear-gradient(180deg, #b80d18 0%, #80050d 65%, #560207 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
 [data-theme="dark"] .brand-text em {
-  color: #e5e5e5;
+  background: linear-gradient(180deg, #ffe484 0%, #e09f1f 55%, #9c6305 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
 }
 
 [data-theme="dark"] .main-nav a {

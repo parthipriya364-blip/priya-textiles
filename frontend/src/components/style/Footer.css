@@ -12,16 +12,94 @@
 }
 
 .footer-brand .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   margin-bottom: 18px;
+  text-decoration: none;
 }
 
-.footer-brand img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
-.footer-brand .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-.footer-brand .brand-text strong { font-family: var(--f-display); color: var(--c-white); font-size: 20px; }
-.footer-brand .brand-text em { font-family: var(--f-accent); color: var(--c-gold-light); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+/* Full logo image display */
+.footer-brand .brand-logo-full {
+  display: block;
+  margin-bottom: 20px;
+  max-width: 320px;
+}
+
+.footer-brand .footer-logo-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+.footer-brand .brand-logo-full:hover .footer-logo-image {
+  opacity: 0.85;
+}
+
+.footer-brand img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Updated Brand Text matching the Priya TEXTILES logo design */
+.footer-brand .brand-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+}
+
+.footer-brand .brand-primary-wrap {
+  display: inline-flex;
+  align-items: flex-end;
+  position: relative;
+}
+
+/* Deep Crimson Red Serif "Priya" */
+.footer-brand .brand-text strong {
+  font-family: "Georgia", "Times New Roman", var(--f-display), serif;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 0.95;
+  background: linear-gradient(180deg, #b80d18 0%, #80050d 65%, #560207 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #9e0b14;
+}
+
+/* Golden Leaf & Wave Flourish on the right of "Priya" */
+.footer-brand .brand-gold-flourish {
+  width: 52px;
+  height: 32px;
+  margin-left: 1px;
+  margin-bottom: -2px;
+  flex-shrink: 0;
+}
+
+/* Metallic Gold Serif "TEXTILES" */
+.footer-brand .brand-text em {
+  font-family: "Georgia", "Times New Roman", var(--f-accent), serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 5.5px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  padding-left: 2px;
+  background: linear-gradient(180deg, #ffe484 0%, #e09f1f 55%, #9c6305 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #e09f1f;
+}
 
 .footer-brand p {
   font-size: 13.5px;
@@ -118,12 +196,19 @@
   border-top: 1px solid #2a2a2a;
 }
 
+/* Preserve the Red & Gold gradient logo text in Dark Mode */
 [data-theme="dark"] .footer-brand .brand-text strong {
-  color: #e5e5e5 !important;
+  background: linear-gradient(180deg, #b80d18 0%, #80050d 65%, #560207 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
 }
 
 [data-theme="dark"] .footer-brand .brand-text em {
-  color: #d4af37 !important;
+  background: linear-gradient(180deg, #ffe484 0%, #e09f1f 55%, #9c6305 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
 }
 
 [data-theme="dark"] .footer-brand p {
